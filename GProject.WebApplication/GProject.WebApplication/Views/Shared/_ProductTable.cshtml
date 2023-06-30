@@ -1,0 +1,92 @@
+﻿@model List<Product>
+@using GProject.Data.DomainClass;
+<style>
+    label {
+        color: black;
+    }
+
+    h1 {
+        color: black;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0px;
+        z-index: 1;
+        background-color: #E5E5E5;
+    }
+
+    .sticky-table {
+        border-collapse: separate !important;
+    }
+</style>
+
+<div class="table-responsive" style="overflow-y: auto; max-height: 700px;">
+    <table class="table table-bordered table-hover sticky-table">
+        <thead class="sticky-header">
+            <tr>
+                <th>STT</th>
+                <th>Tên sản phẩm</th>
+                <th>Loại sản phẩm</th>
+                <th>Giá nhập</th>
+                <th>Giá bán</th>
+                <th>Trạng thái</th>
+                <th style="width: 40px; text-align: center">
+                    @Html.CheckBox("ckbAll", new { style="vertical-align:middle;"})
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int index = 0;
+            }
+            @foreach (var item in Model)
+            {
+                string productType = "";
+                switch (item.ProductType.ToString())
+                {
+                    case "0":
+                        productType = "Sản phẩm thông thường";
+                        break;
+                    case "1":
+                        productType = "Sản phẩm mới";
+                        break;
+                    case "2":
+                        productType = "Sản phẩm nổi bật";
+                        break;
+                    case "3":
+                        productType = "Sản phẩm được yêu thích";
+                        break;
+                    default:
+                        productType = "Sản phẩm khuyến mại";
+                        break;
+                }
+                index++;
+                <tr>
+                    <td hidden><input type="text" value="@item.Id.ToString()" class="prodId" /></td>
+                    <td>@index</td>
+                    <td>@item.Name</td>
+                    <td>@productType</td>
+                    <td>@item.ImportPrice.ToString("0.##")</td>
+                    <td>@item.Price.ToString("0.##") <input type="text" hidden class="prodPrice" value="@item.Price" /></td>
+                    <td>@(item.Status == 0 ? "Đang bán" : "Ngừng bán")</td>
+                    <td>
+                        <input name="cbid" id="cbid" type="checkbox" class="ckbProdItem" onclick="changeSelectedProd(this)" style="vertical-align:middle;" value="">
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script>
+    $(document).ready(function () {
+        $('#ckbAll').change(function () {
+            if ($(this).is(':checked')) {
+                $('.ckbProdItem').prop('checked', true);
+            } else {
+                $('.ckbProdItem').prop('checked', false);
+            }
+        });
+    });
+    
+</script>

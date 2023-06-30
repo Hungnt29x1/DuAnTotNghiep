@@ -1,0 +1,637 @@
+﻿@model GProject.WebApplication.Models.EmployeeDTO
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.Api.MyServices.Services;
+@{
+    ViewBag.Title = "Quản lý Nhân Viên";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    Pager pager = new Pager();
+    int pageNo = 0;
+
+    if (ViewBag.Pager != null)
+    {
+        pager = ViewBag.Pager;
+        pageNo = pager.CurrentPage;
+    }
+
+    int checkPg = int.Parse(Html.Encode(ViewData["pg"]));
+}
+<style>
+    label {
+        color: black;
+    }
+
+    h1 {
+        color: black;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0px;
+        z-index: 1;
+        background-color: #E5E5E5;
+    }
+
+    .sticky-table {
+        border-collapse: separate !important;
+    }
+</style>
+
+<link href="/AdminContent/css/InputCss.css" rel="stylesheet">
+
+<div class="container">
+    @if (@ViewData["Mess"] != null)
+    {
+        <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+    }
+    <button class="btn btn-success" id="changeform" type="button" onclick="ChangePanel()">Thêm mới</button>
+    <button class="btn btn-outline-secondary text-dark " id="changeformsearch" type="button" onclick="ChangeSearch()">Tìm kiếm</button>
+
+    <form id="formdata" asp-action="Save" class="form" enctype="multipart/form-data">
+        <input asp-for="Id" style="width:0px;height:0px;visibility: hidden;" hidden="hidden" />
+        <div class="row mt-5">
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Tên nhân viên:</label>
+                    <input asp-for="Name" placeholder="Name" maxlength="200" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label>Email:</label>
+                    <input asp-for="Email" type="email" placeholder="name@example.com" maxlength="200"
+                        class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="col-md-5">Số điện thoại:</label>
+                    <input asp-for="PhoneNumber" onkeyup="checkphoneNumber()" placeholder="(+84) ..." maxlength="15" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="col-md-5">Mật khẩu:</label>
+                    <input asp-for="Password" type="password" placeholder="password" maxlength="200"
+                        class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="col-md-5">CMT/CCCD:</label>
+                    <input asp-for="PersonalId" placeholder="Personal id" maxlength="200" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="col-md-5">Ngày sinh:<span style="color: red">(*)</span></label>
+                    <input asp-for="DateOfBirth" value="<?php echo date('Y-m-d'); ?>" type="date" maxlength="200"
+                        class="form-control" />
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="col-md-5">Ngày gia nhập:<span style="color: red">(*)</span></label>
+                    <input asp-for="DateOfJoin" value="<?php echo date('Y-m-d'); ?>" type="date" maxlength="200"
+                        class="form-control" />
+                </div>                
+                <div class="col-md-4">
+                    <label>Giới tính:</label>
+                    <div style="margin-top:10px;">
+                        @Html.DropDownList("Sex", new[]
+                        {
+                        new SelectListItem{Text="Nam", Value="0", Selected = (Model.Sex != null ? (Model.Sex == 0) :
+                        true)},
+                        new SelectListItem{Text="Nữ", Value="1", Selected = (Model.Sex != null ? (Model.Sex == 1) :
+                        false)}
+                        }, new { @class = "form-control iscompany" })
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="col-md-5">Địa chỉ:</label>
+                    <input asp-for="Address" placeholder="Address" maxlength="200" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row">                
+                <div class="col-md-4">
+                    <label>Chức vụ</label>
+                    <div style="margin-top:10px;">
+                        @Html.DropDownList("Position", new[]
+                        {
+                        new SelectListItem{Text="Nhân viên", Value="0", Selected = (Model.Position != null ?
+                        (Model.Position
+                        == GProject.Data.Enums.EmployeePosition.Empployee) : true)},
+                        new SelectListItem{Text="Quản lý", Value="1", Selected = (Model.Status != null ? (Model.Position
+                        ==
+                        GProject.Data.Enums.EmployeePosition.Manager) : false)}
+                        }, new { @class = "form-control iscompany" })
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label>Trạng thái</label>
+                    <div style="margin-top:10px;">
+                        @Html.DropDownList("Status", new[]
+                        {
+                        new SelectListItem{Text="Đang làm việc", Value="1", Selected = (Model.Status != null ?
+                        (Model.Status == 0) : true)},
+                        new SelectListItem{Text="Đã nghỉ việc", Value="0", Selected = (Model.Status != null ?
+                        (Model.Status == 1) : false)}
+                        }, new { @class = "form-control iscompany" })
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="col-md-5">Mô tả:</label>
+                    <input asp-for="Description" placeholder="Description" maxlength="200" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row">                
+                <div class="col-md-4">
+                    <label class="col-md-5">Hình ảnh:</label>
+                    <input asp-for="Image_Upload" type="file" class="form-control" />
+                </div>
+            </div>
+            <div class="row">
+                <div style="margin-top: 10px">
+                    <button class="btn btn-success" type="submit" style="height:40px;width:110px;">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <hr style="color:red;" />
+    <form id="Searchform" name="searchForm" method="post" class="form-horizontal" action="/Employee/Index">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="">Mã Nhân Viên</label>
+                                    <div class="col-md-9 col-xs-12">
+                                        <input id="sId" name="sId" value="@ViewData["sId"]" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="">Tên Nhân Viên</label>
+                                    <div class="col-md-9 col-xs-12">
+                                        <input id="sName" name="sName" value="@ViewData["sName"]"
+                                            class="form-control" />
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="">Trạng thái</label>
+                                    <div class="col-md-9">
+                                        @{
+                                            int status = int.Parse(Html.Encode(ViewData["sStatus"]));
+                                        }
+                                        @Html.DropDownList("sStatus",new[]
+                                        {
+                                        new SelectListItem{Text="-- Tất cả--", Value="-1", Selected= (status== -1)},
+                                        new SelectListItem{Text="Đang làm việc", Value="1", Selected= (status== 0)},
+                                        new SelectListItem{Text="Đã nghỉ việc", Value="0", Selected= (status == 1)}
+                                        }, new { @name = "sStatus", @class="searchText form-control select"})
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="">Email</label>
+                                    <div class="col-md-9 col-xs-12">
+                                        <input  style="margin-top: 0px;" type="email" id="sEmail" name="sEmail" value="@ViewData["sEmail"]"
+                                            class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="">Số điện thoại</label>
+                                    <div class="col-md-9 col-xs-12">
+                                        <input id="sPhone" type="text" onkeyup="checkphone()" maxlength="15" name="sPhone" value="@ViewData["sPhone"]"
+                                            class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="">Giới tính</label>
+                                    <div class="col-md-9">
+                                        @{
+                                            int gender = int.Parse(Html.Encode(ViewData["sGender"]));
+                                        }
+                                        @Html.DropDownList("sGender",new[]
+                                        {
+                                        new SelectListItem{Text="-- Tất cả--", Value="-1", Selected= (gender== -1)},
+                                        new SelectListItem{Text="Nam", Value="0", Selected= (gender== 0)},
+                                        new SelectListItem{Text="Nữ", Value="1", Selected= (gender == 1)}
+                                        }, new { @name = "sGender", @class="searchText form-control select"})
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-footer text-center">
+                        <button class="btn btn-success" onclick="$('.searchText').removeAttr('disabled')"
+                            type="submit"><i class="fa fa-search"></i></button>
+                        <a class="btn btn-outline-info" asp-action="Index">
+                            <i class="fas fa-undo-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="row">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title" style="margin-top: 20px; text-align:center; height:50px; padding:10px 10px 10px 10px;">Danh sách
+                    nhân viên</h3>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive" style="overflow-y: auto; max-height: 700px;">
+                    <table class="table table-bordered table-hover sticky-table">
+                        <thead class="sticky-header">
+                            <tr>
+                                <th style="width: 35px;">STT</th>
+                                <th>Hình ảnh</th>
+                                <th>Mã nhân viên</th>
+                                <th>Tên nhân viên</th>
+                                <th>Chức vụ</th>
+                                <th>Email</th>
+                                <th>Số điện thoại</th>
+                                <th>CMT/CCCD</th>
+                                <th>Giới tính</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.EmployeeList != null)
+                            { 
+                                int i = 1;
+                                @foreach (var item in Model.EmployeeList)
+                                {
+                                    <tr>
+                                        <td class="text-center">@i</td>
+                                        <td>
+                                            <img style="width:120px;height:130px; border;1px solid;"
+                                                src="~/images/@item.Image" />
+                                        </td>
+                                        <td>
+                                            @item.EmployeeId
+                                        </td>
+                                        <td>
+                                            @item.Name
+                                        </td>
+                                        <td>
+                                            @(item.Position == 0 ? "Nhân viên" : "Quản lý")
+                                        </td>
+                                        <td>
+                                            @item.Email
+                                        </td>
+                                        <td>
+                                            @item.PhoneNumber
+                                        </td>
+                                        <td>
+                                            @item.PersonalId
+                                        </td>
+                                        <td>
+                                            @(item.Sex == 0 ? "Nam" : "Nữ")
+                                        </td>
+                                        <td>
+                                            @(item.Status == 0 ? "Đã nghỉ việc" : "Đang làm việc")
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-info" onclick="ViewEmployeeDetail('@item.Id')">
+                                                <i class="fas fa-pen-square" aria-hidden="true"></i>
+                                            </button>                                            
+                                        </td>
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <div style="float: right">
+                    @if (pager.TotalPages > 0)
+                    {
+                        <ul class="pagination justify-content-end">
+                            @if (pager.CurrentPage < pager.TotalPages)
+						        {
+							        <li class="page-item">
+								        <a class="page-link" asp-controller="Employee" asp-action="Index"
+									        asp-route-pg="@(pager.CurrentPage - 1)">
+									        Prev
+								        </a>
+							        </li>
+						        }
+                            @for (var pge = pager.StartPage; pge <= pager.EndPage; pge++)
+                            {                                
+                                if(pge == checkPg){
+                                    <li class="page-item @(pge == pager.CurrentPage ? "Active" : "")">
+                                    <a class="page-link" asp-controller="Employee" asp-action="Index" style="color: white; background-color: #206af1;"
+                                        asp-route-pg="@pge">@pge</a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="page-item @(pge == pager.CurrentPage ? "Active" : "")">
+                                    <a class="page-link" asp-controller="Employee" asp-action="Index"
+                                        asp-route-pg="@pge">@pge</a>
+                                    </li>
+                                }
+                            }
+
+                            @if (pager.CurrentPage < pager.TotalPages)
+                            {
+                                <li class="page-item">
+							        <a class="page-link" asp-controller="Employee" asp-action="Index"
+								    asp-route-pg="@(pager.CurrentPage + 1)">
+								Next
+							        </a>
+						        </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* <div class="container">
+    @if (pager.TotalPages > 0)
+    {
+    <ul class="pagination justify-content-end">
+    <li class="page-item">
+    <a class="page-link" asp-controller="Employee" asp-action="Index" asp-route-pg="1">First</a>
+    </li>
+    <li class="page-item">
+    <a class="page-link" asp-controller="Employee" asp-action="Index" asp-route-pg="@(pager.CurrentPage -
+    1)">Previous</a>
+    </li>
+
+    @for (int pge = pager.StartPage; pge < pager.EndPage; pge++)
+    {
+    <li class="page-item @(pge == pager.CurrentPage ? "active" : "")">
+    <a class="page-link" asp-controller="Employee" asp-action="Index" asp-route-pg="@pge"> @pge</a>
+    </li>
+    }
+
+    <li class="page-item">
+    <a class="page-link" asp-controller="Employee" asp-action="Index" asp-route-pg="@(pager.CurrentPage + 1)">Next</a>
+    </li>
+    <li class="page-item">
+    <a class="page-link" asp-controller="Employee" asp-action="Index" asp-route-pg="@(pager.TotalPages)">Last</a>
+    </li>
+    </ul>
+    }
+    </div> *@
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        if ($("#sId").val() != '' ||
+            $("#sName").val() != '' ||
+            $("#sEmail").val() != '' ||
+            $("#sPhone").val() != '') 
+        {
+            $('#Searchform').show();
+        }
+        else{
+            $('#Searchform').hide();
+        }
+
+
+        $('#formdata').hide();
+        var er = document.getElementById('error')
+        if (er != null) {
+            if ($('#error').text() == 'Failed')
+                swal("Không thành công", "Vui lòng xem lại thông tin đã nhập", "error");
+            else
+                swal("Thành công", "Bạn đã lưu thành công thông tin đã nhập", "success");
+        }
+
+        $('.datefield').datepicker({
+            format: 'dd/mm/yyyy'
+        });
+
+    });
+
+    function checkphone(){
+        let regex = /^[0-9]+$/;
+            if (!regex.test($("#sPhone").val()))
+                $("#sPhone").val($("#sPhone").val().replace(/[^0-9.]/g, ""));
+    }
+
+    function checkphoneNumber(){
+        let regex = /^[0-9]+$/;
+            if (!regex.test($("#PhoneNumber").val()))
+                $("#PhoneNumber").val($("#PhoneNumber").val().replace(/[^0-9.]/g, ""));
+    }
+
+    function ChangePanel() {
+        if ($("#changeform").text() == "Thêm mới") {
+            $('#formdata').show();
+            $("#changeform").text("Hủy thay đổi");
+        } else if ($("#changeform").text() == "Hủy thay đổi") {
+            $("#Id").val('');
+            $("#EmployeeId").val('');
+            $("#DateOfJoin").val('');
+            $("#Name").val('');
+            $("#Email").val('');
+            $("#Personald").val('');
+            $("#Position").val(0);
+            $("#Password").val('');
+            $("#DateOfBirth").val('');
+            $("#PhoneNumber").val('');
+            $("#Sex").val(0);
+            $("#Address").val('');
+            $("#Description").val('');
+            $("#Status").val(0);
+            $('#formdata').hide();
+            $("#changeform").text("Thêm mới");
+        }
+    }
+
+    function ChangeSearch() {
+        if ($("#changeformsearch").text() == "Tìm kiếm") {
+            $('#Searchform').show();
+            //$("#ExpirationDate").val(new Date().toJSON().slice(0,19));
+            $("#changeformsearch").text("Hủy tìm kiếm");
+        } else if ($("#changeformsearch").text() == "Hủy tìm kiếm") {
+            $('#Searchform').hide();
+            $("#changeformsearch").text("Tìm kiếm");
+        }
+    }
+
+
+    function validatePhoneNumber(code) {
+        var regex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+        return regex.test(code);
+    }
+    document.querySelector('#formdata').addEventListener('submit', function (e) {
+        var form = this;
+
+        e.preventDefault();
+
+        var id = $("#Id").val();
+        var email = $("#Email").val();
+        var phoneNumber = $("#PhoneNumber").val();
+
+        if (checkValidateData()) {
+            $.ajax({
+                url: "/Employee/CheckEmail",
+                type: "POST",
+                data: { Email: email, Id: id },
+                success: function (result) {
+                    if (result.success) {
+                        $.ajax({
+                            url: "/Employee/CheckPhone",
+                            type: "POST",
+                            data: { PhoneNumber: phoneNumber, Id: id },
+                            success: function (result) {
+                                if (result.success) {
+                                    swal("Bạn chắc chắn lưu những thay đổi này?", {
+                                        title: 'Bạn chắc chắn muốn lưu nhưng thay đổi này?',
+                                        icon: 'info',
+                                        buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
+                                    }).then(function (isConfirm) {
+                                        if (isConfirm) {
+                                            form.submit();
+                                        } else {
+                                            swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
+                                        }
+                                    });
+                                } else {
+                                    swal("Lỗi", "Số điện thoại đã được đăng ký, vui lòng nhập số khác", "error");
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        swal("Lỗi", "Email đã được đăng ký, vui lòng nhập email khác", "error");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert(error);
+                }
+            });            
+        }
+    });
+    function ViewEmployeeDetail(id) {
+        $.getJSON("/Employee/Detail?id=" + id, function (data) {
+            console.log(data);
+            $("#Name").val(data.name);
+            $("#EmployeeId").val(data.employeeId);
+            $("#Email").val(data.email);
+            $("#PersonalId").val(data.personalId);
+            $("#Position").val(data.position);
+            $("#Status").val(data.status);
+            $("#Id").val(data.id);
+            $("#DateOfBirth").val( data.dateOfBirth.split('T')[0] );
+            $("#DateOfJoin").val(data.dateOfJoin.split('T')[0]);
+            $("#PhoneNumber").val(data.phoneNumber);
+            $("#Sex").val(data.sex);
+            $("#Address").val(data.address);
+            $("#Description").val(data.description);
+            $('#formdata').hide();
+
+            $("#changeform").text("Thêm mới");
+            ChangePanel()
+        });
+    }
+    function btnClose() {
+        $('#ViewDetail').modal('hide');
+    }
+
+    function checkValidateData() {
+        var id = $("#Id").val();
+        if(id != null){
+            var regexPass = /^(?=.*[A-Z])(?=.*\d).{6,50}$/;
+            if ($('#Name').val() == '') {
+                sweetAlert("Thông báo", "Thông tin tên không được để trống", "error");
+                return false;
+            }
+            if ($('#Email').val() == '') {
+                sweetAlert("Thông báo", "Thông tin email không được để trống", "error");
+                return false;
+            }
+            if ($('#PhoneNumber').val() == '') {
+                sweetAlert("Thông báo", "Thông tin số điện thoại không được để trống", "error");
+                return false;
+            }
+            if (!validatePhoneNumber($('#PhoneNumber').val())) {
+                sweetAlert("Thông báo", "Số điện thoại không đúng định dạng", "error");
+                return false;
+            }
+            if($('Password').val() != null){
+                if (!regexPass.test($('#Password').val())) {
+                    sweetAlert("Thông báo", "Thông tin mật khẩu không hợp lệ", "error");
+                    return false;
+                }
+            }
+            if ($('#PersonalId').val() == '') {
+                sweetAlert("Thông báo", "Thông tin số CMT/CCCD không được để trống", "error");
+                return false;
+            }
+            if ($('#DateOfBirth').val() == '') {
+                sweetAlert("Thông báo", "Thông ngày sinh không được để trống", "error");
+                return false;
+            }
+            if ($('#DateOfJoin').val() == '') {
+                sweetAlert("Thông báo", "Thông ngày gia nhập không được để trống", "error");
+                return false;
+            }
+            if ($('#Address').val() == '') {
+                sweetAlert("Thông báo", "Thông tin địa chỉ không được để trống", "error");
+                return false;
+            }
+            return true;
+        }
+        var regexPass = /^(?=.*[A-Z])(?=.*\d).{6,50}$/;
+        if ($('#Name').val() == '') {
+            sweetAlert("Thông báo", "Thông tin tên không được để trống", "error");
+            return false;
+        }
+        if ($('#Email').val() == '') {
+            sweetAlert("Thông báo", "Thông tin email không được để trống", "error");
+            return false;
+        }
+        if ($('#PhoneNumber').val() == '') {
+            sweetAlert("Thông báo", "Thông tin số điện thoại không được để trống", "error");
+            return false;
+        }
+        if (!validatePhoneNumber($('#PhoneNumber').val())) {
+            sweetAlert("Thông báo", "Số điện thoại không đúng định dạng", "error");
+            return false;
+        }
+        if (!regexPass.test($('#Password').val())) {
+            sweetAlert("Thông báo", "Thông tin mật khẩu không hợp lệ", "error");
+            return false;
+        }
+        if ($('#PersonalId').val() == '') {
+            sweetAlert("Thông báo", "Thông tin số CMT/CCCD không được để trống", "error");
+            return false;
+        }
+        if ($('#DateOfBirth').val() == '') {
+            sweetAlert("Thông báo", "Thông ngày sinh không được để trống", "error");
+            return false;
+        }
+        if ($('#DateOfJoin').val() == '') {
+            sweetAlert("Thông báo", "Thông ngày gia nhập không được để trống", "error");
+            return false;
+        }
+        if ($('#Address').val() == '') {
+            sweetAlert("Thông báo", "Thông tin địa chỉ không được để trống", "error");
+            return false;
+        }
+        if ($('#Image_Upload').val() == '') {
+            sweetAlert("Thông báo", "Thông tin hình ảnh không được để trống", "error");
+            return false;
+        }
+        return true;
+    }
+
+</script>

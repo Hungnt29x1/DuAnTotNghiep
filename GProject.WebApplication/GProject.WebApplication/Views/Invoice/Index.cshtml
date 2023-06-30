@@ -1,0 +1,222 @@
+﻿@*@model GProject.WebApplication.Models.OrderDto*@
+@model X.PagedList.IPagedList<GProject.Data.DomainClass.Order>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.Api.MyServices.Services;
+@using GProject.WebApplication.Helpers;
+@using GProject.Data.DomainClass;
+@{
+    ViewBag.Title = "Danh sách hóa đơn";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    //Pager pager = new Pager();
+    //int pageNo = 0;
+
+    //if (ViewBag.Pager != null)
+    //{
+    // pager = ViewBag.Pager;
+    // pageNo = pager.CurrentPage;
+    //}
+    var lstOrderDetail = await Commons.GetAll<OrderDetail>(String.Concat(Commons.mylocalhost,
+    "Order/get-all-Order-detail"));
+}
+<style>
+    label {
+        color: black;
+    }
+
+    h1 {
+        color: black;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0px;
+        z-index: 1;
+        background-color: #E5E5E5;
+    }
+
+    .sticky-table {
+        border-collapse: separate !important;
+    }
+</style>
+
+<div class="container">
+    @if (@ViewData["Mess"] != null)
+{
+    <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+}
+<button class="btn btn-outline-secondary text-dark " id="changeformsearch" type="button" onclick="ChangeSearch()">Tìm kiếm</button>
+<form id="Searchform" name="searchForm" method="post" class="form-horizontal" style="margin-top: 15px;" action="/Invoice/Index">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                    <label class="">Mã hóa đơn</label>
+                                    <div class="col-md-9 col-xs-12">
+                                        <input id="sId" name="sId" value="@ViewData["sId"]" class="form-control" />
+                                    </div>
+                                </div>
+                            <div class="form-group">
+                                <label class="">Tên khách hàng</label>
+                                <div class="col-md-9 col-xs-12">
+                                    <input type="text" id="sName" name="sName" value="@ViewData["sName"]"
+                                        class="form-control" />
+                                </div>
+                            </div> 
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="">Email</label>
+                                <div class="col-md-9 col-xs-12">
+                                    <input type="email" id="sEmail" name="sEmail" value="@ViewData["sEmail"]"
+                                        class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="">Số điện thoại</label>
+                                <div class="col-md-9 col-xs-12">
+                                    <input type="text" id="sPhone" onkeyup="checkphone()" maxlength="10" name="sPhone"
+                                        value="@ViewData["sPhone"]" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">                            
+                            <div class="form-group">
+                                <label class="">Hình thức thanh toán</label>
+                                <div class="col-md-9">
+                                    @{
+                                        int gender = int.Parse(Html.Encode(ViewData["sPaymentType"]));
+                                    }
+                                    @Html.DropDownList("sPaymentType",new[]
+                                    {
+                                    new SelectListItem{Text="-- Tất cả--", Value="-1", Selected= (gender== -1)},
+                                    new SelectListItem{Text="Thanh toán khi nhận hàng", Value="0", Selected= (gender==
+                                    0)},
+                                    new SelectListItem{Text="Thanh toán ngay khi đặt hàng", Value="1", Selected= (gender
+                                    == 1)}
+                                    }, new { @name = "sPaymentType", @class="searchText form-control select"})
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer text-center">
+                    <button class="btn btn-success" onclick="$('.searchText').removeAttr('disabled')" type="submit">
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <a class="btn btn-outline-info" asp-action="Index">
+                        <i class="fas fa-undo-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<hr style="color:red; margin-top: 10px" />
+<div class="row">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center; height:50px; padding:10px 10px 10px 10px;">Danh sách đơn
+                đặt hàng</h3>
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive" style="overflow-y: auto; max-height: 700px;">
+                <table class="table table-bordered table-hover sticky-table">
+                    <thead class="sticky-header">
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã hóa đơn</th>
+                            <th>Tên khách hàng</th>
+                            <th>Email</th>
+                            <th>Số điện thoại</th>
+                            <th>Ngày đặt hàng</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null)
+                        {
+                            @for (int i = 0; i < Model.Count(); i++)
+                            {
+                                int statusSel = (int)Model[i].Status;
+                                <tr>
+                                    <td hidden><input class="orderId" disabled hidden="hidden" type="text"
+                                            value="@(Model[i].Id.ToString())"></td>
+                                    <td hidden><input class="customerId" disabled hidden="hidden" type="text"
+                                            value="@(Model[i].CustomerId.ToString())"></td>
+                                    <td>@(i + 1)</td>
+                                    <td>@Model[i].OrderId</td>
+                                    <td>@Model[i].ShippingFullName</td>
+                                    <td>@Model[i].ShippingEmail</td>
+                                    <td>@Model[i].ShippingPhone</td>
+                                    <td>@Model[i].CreateDate</td>
+                                    <td>@string.Format("{0:0,0} đ", Model[i].TotalMoney)</td>
+                                    <td>
+                                        <span class="label label-success">Đã hoàn thành</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-info"
+                                            onclick="location.href='@Url.Action("Detail", "Invoice",new { id = Model[i].Id})'" />
+                                        <i class="fa fa-eye"></i>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <div style="float: right;">
+                @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page }), new
+                X.PagedList.Web.Common.PagedListRenderOptions()
+                {
+                ActiveLiElementClass = "active",
+                PageClasses = new[]{ "page-link"},
+                LiElementClasses=new[] { "page-item" },
+                LinkToNextPageFormat = "Next",
+                LinkToPreviousPageFormat = "Prev",
+                })
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        if ($("#sId").val() != '' ||
+            $("#sName").val() != '' ||
+            $("#sEmail").val() != '' ||
+            $("#sPhone").val() != '') 
+        {
+            $('#Searchform').show();
+        }
+        else{
+            $('#Searchform').hide();
+        }
+    })
+
+    function ChangeSearch() {
+        if ($("#changeformsearch").text() == "Tìm kiếm") {
+            $('#Searchform').show();
+            //$("#ExpirationDate").val(new Date().toJSON().slice(0,19));
+            $("#changeformsearch").text("Hủy tìm kiếm");
+        } else if ($("#changeformsearch").text() == "Hủy tìm kiếm") {
+            $('#Searchform').hide();
+            $("#changeformsearch").text("Tìm kiếm");
+        }
+    }
+    function checkphone(){
+        let regex = /^[0-9]+$/;
+            if (!regex.test($("#sPhone").val()))
+                $("#sPhone").val($("#sPhone").val().replace(/[^0-9.]/g, ""));
+    }
+</script>

@@ -1,0 +1,188 @@
+﻿@model List<GProject.WebApplication.Models.OrderDto>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.Api.MyServices.Services;
+@using GProject.WebApplication.Helpers;
+@using GProject.Data.DomainClass;
+@{
+    ViewBag.Title = "Chi tiết hóa đơn";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    Pager pager = new Pager();
+    int pageNo = 0;
+
+    if (ViewBag.Pager != null)
+    {
+        pager = ViewBag.Pager;
+        pageNo = pager.CurrentPage;
+    }
+    var OrderData = Model.Select(c => c.Order).FirstOrDefault();
+}
+<style>
+    label {
+        color: black;
+    }
+
+    h1 {
+        color: black;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0px;
+        z-index: 1;
+        background-color: #E5E5E5;
+    }
+
+    .sticky-table {
+        border-collapse: separate !important;
+    }
+
+</style>
+
+@if (@ViewData["Mess"] != null)
+{
+    <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+}
+<div class="row">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center; height:50px; padding:10px 10px 10px 10px;">
+                Thông tin đơn hàng
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive" style="overflow-y: auto; max-height: 700px;">
+                <table class="table table-bordered">
+                    <tr>
+                        <th style="width:300px;">Thông tin</th>
+                        <td><label>Thông tin liên quan</label></td>
+                    </tr>
+                    <tr>
+                        <th>Tên khách hàng</th>
+                        <td><label>@OrderData.ShippingFullName</label></td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td>
+                            <label>
+                                @OrderData.ShippingEmail
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Số điện thoại</th>
+                        <td>
+                            <label>
+                                @OrderData.ShippingPhone
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Địa chỉ</th>
+                        <td><label>@OrderData.ShippingAddress, @OrderData.ShippingTown, @OrderData.ShippingDistrict, @OrderData.ShippingCity</label></td>
+                    </tr>
+                    <tr>
+                        <th>Ngày đặt</th>
+                        <td><label>@OrderData.CreateDate</label></td>
+                    </tr>
+                    <tr>
+                        <th>Phí ship</th>
+                        <td><label>@string.Format("{0:0,0} đ", OrderData.ShippingFee)</label></td>
+                    </tr>
+                    <tr>
+                        <th>Tổng tiền</th>
+                        <td><label>@string.Format("{0:0,0} đ", OrderData.TotalMoney)</label></td>
+                    </tr>
+                    <tr>
+                        <th>Trạng thái</th>
+                        <td>
+                            <label>
+                                
+                                    @{
+                                        switch ((int)OrderData.Status)
+                                        {
+                                            case 0:
+                                                <button type="button" disabled class="btn btn-secondary">Chờ xác nhận</button>
+                                                break;
+                                            case 6:
+                                                <button type="button" disabled class="btn btn-warning">Đã xác nhận</button>
+                                                break;
+                                            case 1:
+                                                <button type="button" disabled class="btn btn-info">Đang vận chuyển</button>
+                                                break;
+                                            case 2:
+                                                <button type="button" disabled class="btn btn-primary">Đang giao hàng</button>
+                                                break;
+                                            case 3:
+                                                <button type="button" disabled class="btn btn-success">Đã hoàn thành</button>
+                                                break;
+                                            default:
+                                                <button type="button" disabled class="btn btn-danger">Đã hủy</button>
+                                                break;
+                                        }
+                                    }
+                                
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Mô tả</th>
+                        <td>@OrderData.Description</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<hr style="color:red;" />
+<div class="row">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center; height:50px; padding:10px 10px 10px 10px;">
+                Danh sách sản phẩm đặt hàng
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive" style="overflow-y: auto; max-height: 700px;">
+                <table class="table table-bordered table-hover sticky-table">
+                    <thead class="sticky-header">
+                        <tr>
+                            <th>STT</th>
+                            <th>Hình ảnh</th>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Màu sắc</th>
+                            <th>Size</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null)
+                        {
+                            int index = 0;
+                            foreach (var item in Model)
+                            {
+                                index++;
+                                <tr>
+                                    <td>@(index)</td>
+                                    <td><img style="width:70px;height:70px;" src="~/images/@item.ProductVariation.Image.NullToString()" /></td>
+                                    <td>@item.Product.ProductCode</td>
+                                    <td>@item.Product.Name</td>
+                                    <td>@item.Color.Name</td>
+                                    <td>@item.Size.Code</td>
+                                    <td>@item.OrderDetail.Quantity</td>
+                                    <td>@string.Format("{0:0,0} đ", item.OrderDetail.Price)</td>
+                                    <td>@string.Format("{0:0,0} đ", item.OrderDetail.TotalMoney)</td>
+
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

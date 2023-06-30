@@ -1,0 +1,422 @@
+﻿@model Tuple<GProject.Data.DomainClass.Product, List<GProject.Data.DomainClass.ProductVariation>,
+GProject.Data.DomainClass.Brand, EvaluateCommentDTO, decimal, int, Customer>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.Api.MyServices.Services;
+@using GProject.Data.DomainClass;
+@using GProject.WebApplication.Helpers;
+@using GProject.Data.MyRepositories.IRepositories;
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Guid orderid = (Guid)TempData["orderId"];
+    TempData.Keep("orderId");
+    var ratingSum = Model.Item5;
+    var ratingCount = Model.Item6;
+    decimal rating = 0;
+    if (ratingCount > 0)
+    {
+        rating = (ratingSum / ratingCount);
+    }
+    var totalRating = decimal.Parse(rating.ToString());
+
+    var lstColor = await Commons.GetAll<Color>(String.Concat(Commons.mylocalhost, "Color/get-all-Color"));
+    var lstSize = await Commons.GetAll<Size>(String.Concat(Commons.mylocalhost, "Size/get-all-Size"));
+    var lstCustomer = await Commons.GetAll<Customer>(String.Concat(Commons.mylocalhost, "Customer/get-all-Customer"));
+    var lstOrder = await Commons.GetAll<Order>(String.Concat(Commons.mylocalhost, "Order/get-all-Order"));
+    var lstOrderDetail = await Commons.GetAll<OrderDetail>(String.Concat(Commons.mylocalhost,
+    "Order/get-all-Order-detail"));
+    var lstProducts = await Commons.GetAll<Product>(String.Concat(Commons.mylocalhost, "ProductMGR/get-all-Product-mgr"));
+    var lstProductvariation = await Commons.GetAll<ProductVariation>(String.Concat(Commons.mylocalhost,
+    "ProductVariation/get-all-ProductVariation"));
+
+    var lstEvaluates = await Commons.GetAll<Evaluate>(String.Concat(Commons.mylocalhost, "Evaluate/get-all-Evaluate"));
+    IPromotionRepository _IPromotionRepository = new PromotionRepository();
+    IPromotionDetailRepository _IPromotionDetalRepository = new PromotionDetailRepository();
+
+    var promotiondata = (from p in _IPromotionRepository.GetAll()
+                         join q in _IPromotionDetalRepository.GetAll() on p.Id equals q.PromotionId
+                         where p.Status == GProject.Data.Enums.PromotionStatus.Happenning
+                         select new
+                         {
+                             Promotion = p,
+                             PromotionDetail = q
+                         }).ToList();
+
+    decimal price = Model.Item1.Price;
+    var existProdPromotion = promotiondata.Where(c => c.PromotionDetail.ProductId == Model.Item1.Id).FirstOrDefault();
+    if (existProdPromotion != null)
+    {
+        price = existProdPromotion.PromotionDetail.CurrentPrice;
+    }
+
+}
+
+
+
+<link rel="stylesheet" type="text/css" href="/UserContent/styles/categories_styles.css">
+<link href="/css/product_details.css" rel="stylesheet">
+<link href="/AdminContent/css/style.min.css" rel="stylesheet">
+<input hidden="hidden" id="orderid" value="@orderid" />
+<div>
+    @if (@ViewData["Mess"] != null)
+    {
+        <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+    }
+    @if (@ViewData["message"] != null)
+    {
+        <p style="visibility: hidden;" id="messerror">@ViewData["message"]</p>
+    }
+    @if (Model != null)
+    {
+        <div id="motor-detail" class="container">
+            <div class="row overview">
+                <div class="col-12 col-lg-7 overview-left container-fliud">
+                    <div class="characteristics-image text-center">
+                        @{
+                            string img = Model.Item2.Where(c => c.ProductId == Model.Item1.Id).Select(c =>
+                            c.Image).FirstOrDefault();
+                        }
+                        <img id="imgProd" style="width:650px;height:500px;" src="~/images/@img" alt="">
+                    </div>
+                    <div class="row">
+                        <fieldset>
+
+                            <hr>
+                            @{
+                                foreach (var item in Model.Item2.Select(c => c.ColorId).Distinct().ToList())
+                                {
+                                    string im = Model.Item2.Where(c => c.ColorId == item && c.ProductId == Model.Item1.Id).Select(c =>
+                                    c.Image).FirstOrDefault().NullToString();
+                                    <button type="button" onclick="changeImageProd('@im')">
+                                        <img style="width:130px; height:160px;"
+                                 class="img-thumbnail" src="~/images/@im" alt="">
+                                    </button>
+                                }
+                            }
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-5 overview-right">
+                    <form id="formdata" class="form-horizontal d-block">
+                        <input id="cTotalMoney" name="cTotalMoney" hidden="hidden" />
+                        <input id="cColor" name="cColor" hidden="hidden" />
+                        <input id="cSize" name="cSize" hidden="hidden" />
+                        <input id="cQuantity" name="cQuantity" hidden="hidden" />
+                        <input id="cPrice" name="cPrice" hidden="hidden" />
+                        <input id="cProductId" name="cProductId" value="@Model.Item1.Id.ToString()" hidden="hidden" />
+
+                        <h2 class="d-none d-lg-block" style="color:Black">@Model.Item1.Name</h2>
+
+                        <div class="row">
+                            <h3 class="d-none d-lg-block" style="color:Red">
+                                Giá hiện tại: @string.Format("{0:0,0}", price) đ
+                                @if (existProdPromotion != null)
+                                {
+                                    <del style="    color: gray; font-size: 18px;">@string.Format("{0:0,0}", existProdPromotion.PromotionDetail.InitialPrice) đ </del>
+                                }
+                            </h3>
+
+                        </div>
+                        <div class="overview-detail mb-3" style="min-height: 0">
+                            <div class="characteristics-desc">
+                                <h4>Nhãn hiệu: @Model.Item3.Name</h4>
+                                @{
+                                    string productType = "";
+                                    foreach (var item in Model.Item1.ProductType.Split(',').Distinct().ToList())
+                                    {
+                                        switch (item)
+                                        {
+                                            case "0":
+                                                productType += "Sản phẩm bình thường";
+                                                break;
+                                            case "1":
+                                                productType += "Sản phẩm mới";
+                                                break;
+                                            case "2":
+                                                productType += "Sản phẩm nổi bật";
+                                                break;
+                                            case "3":
+                                                productType += "Sản phẩm được yêu thích";
+                                                break;
+                                            case "4":
+                                                productType += "Sản phẩm khuyến mại";
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                }
+                                <h4>Loại sản phẩm: @productType</h4>
+                                <h4>Lượt xem: @Model.Item1.ViewCount <i class="fa fa-eye"></i></h4>
+
+                                <h4>
+                                    Số lượng còn lại:
+                                    <span id="mQuantityInstock" value="">
+                                        @Model.Item2.Sum(c => c.QuantityInStock)
+
+                                    </span>
+                                </h4>
+                                <h4 class="cl-class">
+                                    Màu sắc:
+                                    @{
+                                        foreach (var item in Model.Item2.Select(c => c.ColorId).Distinct().ToList())
+                                        {
+                                            string im = Model.Item2.Where(c => c.ColorId == item && c.ProductId == Model.Item1.Id).Select(c => c.Image).FirstOrDefault().NullToString();
+                                            <button type="button" value="@item" id="btnColor" onclick="changeImageProd('@im')" style="padding: 0 5px 0 5px;" href="/productdetail/@item/@Model.Item1.Id">
+                                                @(lstColor.FirstOrDefault(c => c.Id == item).Name.NullToString())
+                                            </button>
+                                        }
+                                    }
+                                </h4>
+                                <h4 class="si-class">
+                                    Size:
+                                    @{
+
+                                        foreach (var item in Model.Item2.Select(c => c.SizeId).Distinct().ToList())
+                                        {
+                                            <button type="button" value="@item" id="btnSize" style="padding: 0 9px 0 9px;">
+                                                @(lstSize.FirstOrDefault(c => c.Id == item).Code.NullToString())
+                                            </button>
+                                        }
+                                    }
+                                </h4>
+
+                                <div class="input-group plus-minus-input row">
+                                    <h4 class="col-md-4">Số lượng:</h4>
+                                    <div class="col-md-8 justify-content-center">
+                                        <div class="row">
+                                            <div class="input-group-button col-md-3 mt-2">
+                                                <button type="button" class="btn-warning hollow circle" data-quantity="minus"
+                                                    data-field="quantity" style="margin-right:5px;">
+                                                    <i class="fa fa-minus" aria-hidden="true"></i>
+                                                </button>
+                                            </div>
+                                            <input class="input-group-field form-control col-md-5 quantity" type="number" id="quantity"
+                                               name="quantity" value="0" style="width:100px;">
+                                            <div class="input-group-button col-md-3 mt-2">
+                                                <button type="button" class="btn-info hollow circle" data-quantity="plus"
+                                                    data-field="quantity" style="margin-left:5px;">
+                                                    <i class="fa fa-plus" aria-hidden="true"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <h3 class="col-4">Thành tiền:</h3>
+                                    <h3 class="col-8" style="color:red;" id="totalMoney" name="totalMoney"> 0 đ</h3>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-3">Mô tả của bạn:</label>
+                                    <div class="col-sm-12">
+                                        <textarea class="form-control" name="cDescription" id="cDescription" cols="50" rows="5"
+                                              style="border:double 4px orange;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <button type="button" id="btnAction" onclick="AddToOrder()" class="btn btn-outline-danger col-md-5">
+                                <i class="fa fa-shopping-cart" style="margin-right:10px; font-size: 17px;"></i>Thêm vào đơn hàng
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('input.quantity').keyup(function () {
+                let regex = /^[0-9]+$/;
+                if (!regex.test($(this).val()))
+                    $(this).val($(this).val().replace(/[^0-9.]/g, ""));
+            });
+
+            $('[data-quantity="plus"]').click(function (e) {
+                e.preventDefault();
+                fieldName = $(this).attr('data-field');
+                var currentVal = parseInt($('input[name=' + fieldName + ']').val());
+                if (!isNaN(currentVal)) {
+                    $('input[name=' + fieldName + ']').val(currentVal + 1);
+                } else {
+                    $('input[name=' + fieldName + ']').val(0);
+                }
+                sumTotal();
+            });
+            $('[data-quantity="minus"]').click(function (e) {
+                e.preventDefault();
+                fieldName = $(this).attr('data-field');
+                var currentVal = parseInt($('input[name=' + fieldName + ']').val());
+                if (!isNaN(currentVal) && currentVal > 0) {
+                    $('input[name=' + fieldName + ']').val(currentVal - 1);
+                } else {
+                    $('input[name=' + fieldName + ']').val(0);
+                }
+                sumTotal();
+            });
+
+            $(".quantity").change(function () {
+                sumTotal();
+            });
+
+            $('.cl-class > button').click(function () {
+                $('.cl-class > button').css('background-color', 'white');
+                $(this).css('background-color', '#00CCCC');
+                $('#cColor').val($(this).val());
+                getQuantityInstock();
+            });
+
+            $('.si-class > button').click(function () {
+                $('.si-class > button').css('background-color', 'white');
+                $(this).css('background-color', '#00CCCC');
+                $('#cSize').val($(this).val());
+                getQuantityInstock();
+            });
+
+            var er = document.getElementById('error')
+            if (er != null) {
+                if ($('#error').text() == 'Failed')
+                    swal("Không thành công", "Thao tác thất bại, vui lòng thực hiện lại", "error");
+                else
+                    swal("Thành công", "Thao tác thành công", "success");
+            }
+
+            var messerror = document.getElementById('messerror')
+            if (messerror != null) {
+                swal("Không thành công", messerror, "error");
+            }
+        });
+
+        function TinhPhanTram(tongtien, giamgia) {
+            let thanhtien = tongtien - (tongtien * ((100 - giamgia) / 100))
+            return thanhtien
+        }
+
+        function ConvertDate(time) {
+            var date = new Date(time);
+            var dateConvert = (((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '/' + ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '/' + date.getFullYear())
+            return dateConvert
+        }
+
+        function getQuantityInstock() {
+            $.ajax({
+                data: {
+                    cColorId: $('#cColor').val(),
+                    cSizeId: $('#cSize').val(),
+                    cProductId: $('#cProductId').val()
+                },
+                contentType: 'application/json',
+                dataType: 'json',
+                url: '/Product/GetQuantityInstock',
+                type: 'GET',
+                success: function (result) {
+                    $('#mQuantityInstock').text(result);
+                }
+            });
+        }
+
+        function sumTotal() {
+            let mQuantity = parseInt($('#quantity').val().replace(/\./g, '') || 0) || 0;
+            let mPrice = parseFloat(@price) || 0;
+            $('#cQuantity').val(mQuantity);
+            $('#cPrice').val(mPrice);
+            $('#cTotalMoney').val(mQuantity * mPrice);
+            $('#pTotalMoney').val(mQuantity * mPrice);
+            $('#totalMoney').text(commasThousands(mQuantity * mPrice) + ' đ');
+            $('#txtTotalProduct').text(commasThousands($('#pTotalMoney').val()));
+        }
+
+        function commasThousands(nStr) {
+            nStr += '';
+            nStr = nStr.replace(/\./g, '');
+            x = nStr.split('.');
+            x1 = x[0];
+            x2 = x.length > 1 ? '.' + x[1] : '';
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x1)) {
+                x1 = x1.replace(rgx, '$1' + '.' + '$2');
+            }
+            return x1 + x2;
+        }
+
+        function checkValidateData() {
+            if ($('#cQuantity').val() == '' || $('#cQuantity').val() == '0') {
+                sweetAlert("Thông tin số lượng sản phẩm không được để trống", "", "error");
+                return false;
+            }
+            if (parseInt($('#cQuantity').val() || 0) > parseInt($('#mQuantityInstock').text() || 0)) {
+                sweetAlert("Số lượng còn lại của sản phẩm còn lại là " + parseInt($('#mQuantityInstock').text() || 0) + ", số lượng bạn đặt vượt quá số lượng còn lại", "", "error");
+                return false;
+            }
+            if ($('#cSize').val() == '') {
+                sweetAlert("Vui lòng chọn kích cỡ", "", "error");
+                return false;
+            }
+            if ($('#cColor').val() == '') {
+                sweetAlert("Vui lòng chọn màu sắc", "", "error");
+                return false;
+            }
+
+            return true;
+        }
+
+        function changeImageProd(strImage) {
+            $('#imgProd').attr('src', '/images/' + strImage);
+            getQuantityInstock();
+        }
+
+        function changeLikeCount() {
+            $.ajax({
+                data: { cProductId: $('#cProductId').val() },
+                contentType: 'application/json',
+                dataType: 'json',
+                url: '/Product/ReleaseHeart',
+                type: 'GET',
+                success: function (response) {
+                    location.reload();
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    location.reload();
+                }
+            });
+        }
+
+        function AddToOrder() {
+            if (checkValidateData()) {
+                swal("", {
+                    title: 'Thêm sản phẩm vào đơn hàng sẽ dẫn đến thay đổi thành tiền, bạn vẫn muốn thay đổi chứ?',
+                    icon: 'warning',
+                    buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
+                }).then(function (isConfirm) {
+                    if (isConfirm) {
+                        var _product = {};
+                        _product.color = parseInt($('#cColor').val());
+                        _product.size = parseInt($('#cSize').val());
+                        _product.price = parseFloat($('#cPrice').val());
+                        _product.quantity = parseInt($('#cQuantity').val());
+                        _product.totalMoneyItem = parseFloat($('#cTotalMoney').val());
+                        _product.productId = $('#cProductId').val();
+
+                        $.ajax({
+                            data: {
+                                products: JSON.stringify(_product)
+                            },
+                            contentType: 'application/json',
+                            dataType: 'json',
+                            url: '/Order/AddToOrderForAdmin',
+                            type: 'GET',
+                            success: function (result) {
+                                swal("Thêm vào đơn hàng thành công", "", "success");
+                                window.location = '/Order/Update?id=@orderid'
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    </script>

@@ -1,0 +1,206 @@
+﻿@model GProject.WebApplication.Models.CustomerDTO
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewBag.Title = "Đăng ký";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    label {
+        color: black;
+    }
+
+    h1 {
+        color: black;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0px;
+        z-index: 1;
+        background-color: #E5E5E5;
+    }
+
+    .sticky-table {
+        border-collapse: separate !important;
+    }
+</style>
+
+
+
+<div class="container" style="margin-top: 200px; margin-bottom: 200px;">
+    <h3 class="text-center">Đăng ký</h3>
+
+@if (@ViewData["Mess"] != null)
+{
+        <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+}
+<form id="formdata" asp-action="SaveRegister" class="form" enctype="multipart/form-data">
+    <input asp-for="Id" style="width:0px;height:0px;visibility: hidden;" hidden="hidden" />
+    <div class="row mt-5">
+        <div class="row">
+            <div class="col-md-4">
+            <label class="col-md-5">Tên khách hàng:<span style="color: red">(*)</span></label>
+            <input asp-for="Name" placeholder="Name" maxlength="200" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label class="col-md-5">Email:<span style="color: red">(*)</span></label>
+            <input asp-for="Email" type="email" placeholder="name@example.com" maxlength="200" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label class="col-md-5">Mật khẩu:<span style="color: red">(*)</span></label>
+            <input asp-for="Password" type="password" placeholder="password" maxlength="200" class="form-control" />
+        </div>
+        </div>
+
+        <div class="row" style="margin-top: 15px;">
+            <div class="col-md-4">
+            <label class="col-md-5">Ngày sinh:<span style="color: red">(*)</span></label>
+            <input asp-for="DateOfBirth" type="date" placeholder="__/ __/ ____" maxlength="200" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label class="col-md-5">Số điện thoại:<span style="color: red">(*)</span></label>
+            <input asp-for="PhoneNumber" type="text" placeholder="(+84) ..." maxlength="200" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label>Giới tính:</label><span style="color: red">(*)</span>
+            <select asp-for="Sex" asp-items="@ViewBag.Sex" class="form-select col-md-5">
+            </select>
+            <span asp-validation-for="Sex" class="text-danger"></span>
+        </div>
+        </div>
+
+
+        <div class="row" style="margin-top: 15px;">
+            <div class="col-md-4">
+            <label class="col-md-5">Địa chỉ:<span style="color: red">(*)</span></label>
+            <input asp-for="Address" type="text" placeholder="Address" maxlength="200" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label class="col-md-5">Mô tả:</label>
+            <input asp-for="Description" type="text" placeholder="Description" maxlength="200" class="form-control" />
+        </div>
+
+        <div class="col-md-4">
+            <label class="col-md-5">Hình ảnh:</label>
+            <input asp-for="Image_Upload" type="file" class="form-control" />
+        </div>
+        </div>
+        <div class="col-md-2" style="margin-top: 15px;">
+            <label></label>
+            <button class="btn btn-success" type="submit" style="height:40px;width:110px;"><i class="fa fa-plus" aria-hidden="true" style="margin-right:4px;"></i>Lưu</button>
+        </div>
+    </div>
+
+    @* <div class="text-center">
+        <p>hoặc đăng nhập với:</p>
+        <div class="btn-group" role="group">
+            <a class="btn btn-outline-danger " asp-controller="OAuth" asp-action="ExternalLogin" asp-route-provider="Google" asp-route-returnurl="@ViewData["ReturnUrl"]">Google</a>
+        </div>
+    </div> *@
+</form>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var er = document.getElementById('error')
+        if (er != null) {
+            if ($('#error').text() == 'Failed')
+                swal("Không thành công", "Vui lòng xem lại thông tin đã nhập", "error");
+            else
+                swal("Thành công", "Bạn đã lưu thành công thông tin đã nhập", "success");
+        }
+    });
+    function validatePhoneNumber(code) {
+        var regex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+        return regex.test(code);
+    }
+    document.querySelector('#formdata').addEventListener('submit', function (e) {
+        var form = this;
+        e.preventDefault();
+        var email = $("#Email").val();
+        var phoneNumber = $("#PhoneNumber").val();
+
+        if (checkValidateData()) {
+            $.ajax({
+                url: "/Account/CheckEmail",
+                type: "POST",
+                data: { Email: email },
+                success: function (result) {
+                    if (result.success) {
+                        $.ajax({
+                            url: "/Account/CheckPhone",
+                            type: "POST",
+                            data: { PhoneNumber: phoneNumber },
+                            success: function (result) {
+                                if (result.success) {
+                                    swal("Bạn chắc chắn lưu những thay đổi này?", {
+                                        title: 'Bạn chắc chắn muốn lưu nhưng thay đổi này?',
+                                        icon: 'info',
+                                        buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
+                                    }).then(function (isConfirm) {
+                                        if (isConfirm) {
+                                            form.submit();
+                                        } else {
+                                            swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
+                                        }
+                                    });
+
+                                } else {
+                                    swal("Lỗi", "Số điện thoại đã được đăng ký, vui lòng nhập số khác", "error");
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        swal("Lỗi", "Email đã được đăng ký, vui lòng nhập email khác", "error");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert(error);
+                }
+            });
+        }
+    });
+
+
+    function checkValidateData() {
+        var regexPass = /^(?=.*[A-Z])(?=.*\d).{6,50}$/;
+        if ($('#Name').val() == '') {
+            sweetAlert("Thông báo", "Thông tin tên khách hàng không được để trống", "error");
+            return false;
+        }
+        if ($('#Email').val() == '') {
+            sweetAlert("Thông báo", "Thông tin email không được để trống", "error");
+            return false;
+        }
+        if (!regexPass.test($('#Password').val())) {
+            sweetAlert("Thông báo", "Thông tin mật khẩu không hợp lệ", "error");
+            return false;
+        }
+        if ($('#DateOfBirth').val() == '') {
+            sweetAlert("Thông báo", "Thông tin ngày sinh không được để trống", "error");
+            return false;
+        }
+        if ($('#PhoneNumber').val() == '') {
+            sweetAlert("Thông báo", "Thông tin số điện thoại không được để trống", "error");
+            return false;
+        }
+        if (!validatePhoneNumber($('#PhoneNumber').val())) {
+            sweetAlert("Thông báo", "Số điện thoại không đúng định dạng", "error");
+            return false;
+        }
+
+        if ($('#Address').val() == '') {
+            sweetAlert("Thông báo", "Thông tin địa chỉ không được để trống", "error");
+            return false;
+        }
+        if ($('#Image_Upload').val() == '') {
+            sweetAlert("Thông báo", "Thông tin hình ảnh không được để trống", "error");
+            return false;
+            }
+        return true;
+    }
+</script>

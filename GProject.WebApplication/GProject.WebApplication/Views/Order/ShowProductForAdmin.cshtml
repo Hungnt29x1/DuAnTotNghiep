@@ -1,0 +1,229 @@
+﻿@model Tuple<List<GProject.WebApplication.Models.ProductDTO>, List<GProject.Data.DomainClass.Color>,
+List<GProject.Data.DomainClass.Size>, List<GProject.Data.DomainClass.Brand>>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.Api.MyServices.Services;
+@using GProject.Data.DomainClass;
+@using GProject.WebApplication.Helpers;
+@using GProject.Data.MyRepositories.IRepositories;
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    IPromotionRepository _IPromotionRepository = new PromotionRepository();
+    IPromotionDetailRepository _IPromotionDetalRepository = new PromotionDetailRepository();
+
+    var promotiondata = (from p in _IPromotionRepository.GetAll()
+                         join q in _IPromotionDetalRepository.GetAll() on p.Id equals q.PromotionId
+                         where p.Status == GProject.Data.Enums.PromotionStatus.Happenning
+                         select new
+                         {
+                             Promotion = p,
+                             PromotionDetail = q
+                         }).ToList();
+
+    List<Promotion> promotions = _IPromotionRepository.GetAll();
+    Pager pager = new Pager();
+    int pageNo = 0;
+
+    if (ViewBag.Pager != null)
+    {
+        pager = ViewBag.Pager;
+        pageNo = pager.CurrentPage;
+    }
+
+    IList<SelectListItem> StoreItems = new List<SelectListItem>();
+    var lstBrand = await Commons.GetAll<Brand>(String.Concat(Commons.mylocalhost, "Brand/get-all-Brand"));
+    int brand = int.Parse(Html.Encode(ViewData["brand"]));
+    if (lstBrand.Count > 0)
+    {
+        StoreItems.Add(new SelectListItem()
+                {
+                    Value = "-1",
+                    Text = "-- Nhãn hiệu --",
+                    Selected = "-1" == brand.ToString(),
+                });
+
+        foreach (var br in lstBrand.Distinct())
+        {
+            if (StoreItems.FirstOrDefault(c => c.Value == br.Id.ToString()) == null)
+            {
+                StoreItems.Add(new SelectListItem()
+                        {
+                            Value = br.Id.ToString(),
+                            Text = br.Name,
+                            Selected = br.Id == brand,
+                        });
+            }
+        }
+    }
+
+    var lstCategory = await Commons.GetAll<Category>(String.Concat(Commons.mylocalhost, "Category/get-all-Category"));
+    IList<SelectListItem> CategoryItems = new List<SelectListItem>();
+    Guid category = new Guid(Html.Encode(ViewData["category"]));
+    if (lstCategory.Count > 0)
+    {
+        CategoryItems.Add(new SelectListItem()
+                {
+                    Value = "-1",
+                    Text = "-- Danh mục --",
+                    Selected = "-1" == category.NullToString(),
+                });
+
+        foreach (var br in lstCategory)
+        {
+            CategoryItems.Add(new SelectListItem()
+                    {
+                        Value = br.Id.ToString(),
+                        Text = br.Name,
+                        Selected = br.Id.ToString() == category.NullToString(),
+                    });
+        }
+    }
+}
+    <link type="text/css" href="~/plugins/animate.css" rel="stylesheet" />
+    <link type="text/css" href="~/plugins/owl.carousel.css" rel="stylesheet" />
+    <link type="text/css" href="~/plugins/owl.theme.default.css" rel="stylesheet" />
+    <link type="text/css" href="~/styles_customer/main_styles.css" rel="stylesheet" />
+    <link type="text/css" href="~/styles_customer/responsive.css" rel="stylesheet" />
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="~/plugins/plugins_js/custom.js"></script>
+<script src="~/plugins/plugins_js/easing.js"></script>
+<script src="~/plugins/plugins_js/isotope.pkgd.min.js"></script>
+<script src="~/plugins/plugins_js/owl.carousel.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<div class="new_arrivals">
+    <div class="container">
+        <div class="col text-center">
+            <div class="section_title">
+                <h2>Danh sách sản phẩm</h2>
+            </div>
+        </div>
+        <div class="row align-items-center">
+            <div class="col text-center">
+                <div class="new_arrivals_sorting">
+                    <ul class="arrivals_grid_sorting clearfix button-group filters-button-group">
+                        <li class="grid_sorting_button button d-flex flex-column justify-content-center align-items-center active is-checked"
+                            data-filter="*">Tất cả</li>
+                        @foreach (var item in lstCategory)
+                        {
+                            <li class="grid_sorting_button button d-flex flex-column justify-content-center align-items-center"
+                            data-filter=".@item.Id">@item.Name</li>
+                        }
+
+                        @foreach (var item in lstBrand)
+                        {
+                            <li class="grid_sorting_button button d-flex flex-column justify-content-center align-items-center"
+                            data-filter=".@item.Id">@item.Name</li>
+                        }
+
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="product-grid" data-isotope='{ "itemSelector": ".product-item", "layoutMode": "fitRows" }'>
+                    @if (Model.Item1.ToList().Count() > 0)
+                    {
+                        @foreach (var x in Model.Item1.ToList())
+                        {
+                            var existProdPromotion = promotiondata.Where(c => c.PromotionDetail.ProductId ==
+                            x.Product.Id).FirstOrDefault();
+                            var getCategory = lstCategory.FirstOrDefault(c => c.Id == x.Product.CategoryId);
+                            var getbrand = lstBrand.FirstOrDefault(c => c.Id == x.Product.BrandId);
+
+                            <div class="product-item @getCategory.Id @getbrand.Id">
+                                <div class="product discount product_filter">
+                                    <div class="product_image">
+                                        @{
+                                            string image = "";
+                                            if (x.ProductVariations != null && x.ProductVariations.Count > 0)
+                                            {
+                                                var imgItem = x.ProductVariations.Select(c => c.Image).FirstOrDefault();
+                                                image = imgItem != null ? imgItem : "";
+                                            }
+                                        }
+                                        <img src="~/images/@image" style="height: 250px;" alt="">
+                                    </div>
+                                    <div class="favorite favorite_left"></div>
+                                    @if (existProdPromotion != null && existProdPromotion.Promotion.DiscountPercent == 1)
+                                    {
+                                        <div class="product_bubble product_bubble_right product_bubble_red d-flex flex-column align-items-center">
+                                            <span>-@(existProdPromotion.Promotion.DiscountRate)%</span>
+                                        </div>
+                                    }
+                                    @if (existProdPromotion != null && existProdPromotion.Promotion.DiscountPercent == 0)
+                                    {
+                                        <div class="product_bubble product_bubble_right product_bubble_red d-flex flex-column align-items-center"
+                                 style="text-transform: none;">
+                                            <span>-@(existProdPromotion.Promotion.DiscountRate)đ</span>
+                                        </div>
+                                    }
+                                    <div class="product_info">
+                                        <h6 class="product_name">
+                                            <a href="single.html">@x.Product.Name</a>
+                                        </h6>
+
+                                        @if (existProdPromotion == null)
+                                        {
+                                            <div class="product_price"> @string.Format("{0:0,0} đ", double.Parse(x.Product.Price.ToString()))
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="product_price">
+                                                @string.Format("{0:0,0} đ", double.Parse(existProdPromotion.PromotionDetail.CurrentPrice.ToString()))
+                                                <span>
+                                                    @string.Format("{0:0,0} đ", double.Parse(existProdPromotion.PromotionDetail.InitialPrice.ToString()))
+                                                </span>
+                                            </div>
+                                        }
+
+                                    </div>
+                                </div>
+                                <div class="red_button add_to_cart_button">
+                                    <a href="/productdetail-for-admin/@x.Product.Id">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            @if (pager.TotalPages > 0)
+            {
+                <ul class="pagination justify-content-end">
+                    @if (pager.CurrentPage < pager.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-controller="Product" asp-action="Index"
+                       asp-route-pg="@(pager.TotalPages)">Last</a>
+                        </li>
+                    }
+                    @for (var pge = pager.StartPage; pge <= pager.EndPage; pge++)
+                    {
+                        <li class="page-item @(pge == pager.CurrentPage ? "Active" : "")">
+                            <a class="page-link" asp-controller="Product" asp-action="Index" asp-route-pg="@pge">@pge</a>
+                        </li>
+                    }
+                    @if (pager.CurrentPage < pager.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-controller="Product" asp-action="Index"
+                       asp-route-pg="@(pager.CurrentPage + 1)">Next</a>
+                        </li>
+
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+

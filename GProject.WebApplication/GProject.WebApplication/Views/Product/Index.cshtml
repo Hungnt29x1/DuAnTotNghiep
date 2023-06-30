@@ -1,0 +1,367 @@
+﻿@model Tuple<List<GProject.WebApplication.Models.ProductDTO>, List<GProject.Data.DomainClass.Color>,
+List<GProject.Data.DomainClass.Size>, List<GProject.Data.DomainClass.Brand>,
+List<GProject.Data.DomainClass.ViewHistory>>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.Api.MyServices.Services;
+@using GProject.Data.DomainClass;
+@using GProject.WebApplication.Helpers;
+@using GProject.Data.MyRepositories.IRepositories;
+@{
+	ViewBag.Title = "Danh sách sản phẩm";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	IPromotionRepository _IPromotionRepository = new PromotionRepository();
+	IPromotionDetailRepository _IPromotionDetalRepository = new PromotionDetailRepository();
+
+	var promotiondata = (from p in _IPromotionRepository.GetAll()
+							join q in _IPromotionDetalRepository.GetAll() on p.Id equals q.PromotionId
+							where p.Status == GProject.Data.Enums.PromotionStatus.Happenning
+							select new
+							{
+								Promotion = p,
+								PromotionDetail = q
+							}).ToList();
+
+	List<Promotion> promotions = _IPromotionRepository.GetAll();
+	Pager pager = new Pager();
+	int pageNo = 0;
+
+	if (ViewBag.Pager != null)
+	{
+		pager = ViewBag.Pager;
+		pageNo = pager.CurrentPage;
+	}
+
+	IList<SelectListItem> StoreItems = new List<SelectListItem>();
+	var lstBrand = await Commons.GetAll<Brand>(String.Concat(Commons.mylocalhost, "Brand/get-all-Brand"));
+	int brand = int.Parse(Html.Encode(ViewData["brand"]));
+	if (lstBrand.Count > 0)
+	{
+		StoreItems.Add(new SelectListItem()
+				{
+					Value = "-1",
+					Text = " Nhãn hiệu ",
+					Selected = "-1" == brand.ToString(),
+				});
+
+		foreach (var br in lstBrand.Distinct().Where(x => x.Status == 1))
+		{
+			if (StoreItems.FirstOrDefault(c => c.Value == br.Id.ToString()) == null)
+			{
+				StoreItems.Add(new SelectListItem()
+						{
+							Value = br.Id.ToString(),
+							Text = br.Name,
+							Selected = br.Id == brand,
+						});
+			}
+		}
+	}
+
+	var lstCategory = await Commons.GetAll<Category>(String.Concat(Commons.mylocalhost, "Category/get-all-Category"));
+	IList<SelectListItem> CategoryItems = new List<SelectListItem>();
+	Guid category = new Guid(Html.Encode(ViewData["category"]));
+	if (lstCategory.Count > 0)
+	{
+		CategoryItems.Add(new SelectListItem()
+				{
+					Value = "-1",
+					Text = " Danh mục ",
+					Selected = "-1" == category.NullToString(),
+				});
+
+		foreach (var br in lstCategory.Where(x => x.Status == 1))
+		{
+			CategoryItems.Add(new SelectListItem()
+					{
+						Value = br.Id.ToString(),
+						Text = br.Name,
+						Selected = br.Id.ToString() == category.NullToString(),
+					});
+		}
+	}
+
+	int checkPg = int.Parse(Html.Encode(ViewData["pg"]));
+}
+
+
+<div class="new_arrivals" style="margin-top: 125px;">
+	<div class="container">
+		<div class="row">
+			<div class="col text-center">
+				<div class="section_title new_arrivals_title">
+					<h2>Danh sách sản phẩm</h2>
+				</div>
+			</div>
+		</div>
+		@* <div class="row align-items-center">
+		<div class="col text-center">
+		<div class="new_arrivals_sorting">
+		<ul class="arrivals_grid_sorting clearfix button-group filters-button-group">
+		<li class="grid_sorting_button button d-flex flex-column justify-content-center align-items-center active
+		is-checked"
+		data-filter="*">Tất cả</li>
+		@foreach (var item in lstCategory)
+		{
+		<li class="grid_sorting_button button d-flex flex-column justify-content-center align-items-center"
+		data-filter=".@item.Id">@item.Name</li>
+		}
+
+		@foreach (var item in lstBrand)
+		{
+		<li class="grid_sorting_button button d-flex flex-column justify-content-center align-items-center"
+		data-filter=".@item.Id">@item.Name</li>
+		}
+
+
+		</ul>
+
+		</div>
+		</div>
+		</div> *@
+
+		<div class="row align-items-center">
+			<div class="col text-center">
+				<div class="new_arrivals_sorting">
+					<ul class="arrivals_grid_sorting clearfix button-group filters-button-group">
+						<form id="Searchform" name="searchForm" method="post" class="form-horizontal"
+							action="/Product/index">
+							<div class="row">
+								<div class="col-md-2">
+									<div class="form-group">
+										<input type="text" id="prodName" name="prodName" value="@ViewData["prodName"]"
+											placeholder="Tên sản phẩm" class="form-control col-12" />
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="form-group">
+										@Html.DropDownList("category", CategoryItems, new { @maxlength = "30", @class =
+										"searchText form-control col-12" })
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="form-group">
+										@Html.DropDownList("brand", StoreItems, new { @maxlength = "30", @class =
+										"searchText form-control col-12" })
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="form-group">
+										@{
+											decimal fPrice = decimal.Parse(Html.Encode(ViewData["fPrice"]));
+										}
+										@Html.DropDownList("fPrice",new[]
+										{
+										new SelectListItem{Text=" Giá từ ", Value="-1", Selected= (fPrice== -1)},
+										new SelectListItem{Text="0 VNĐ", Value="0", Selected= (fPrice== 0)},
+										new SelectListItem{Text="100.000 VNĐ", Value="100000", Selected= (fPrice==
+										100000)},
+										new SelectListItem{Text="200.000 VNĐ", Value="200000", Selected= (fPrice ==
+										200000)},
+										new SelectListItem{Text="500.000 VNĐ", Value="500000", Selected= (fPrice==
+										500000)},
+										new SelectListItem{Text="1.000.000 VNĐ", Value="1000000", Selected= (fPrice ==
+										1000000)}
+										}, new { @name = "sStatus", @class="searchText form-control select col-12"})
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="form-group">
+										@{
+											int tPrice = int.Parse(Html.Encode(ViewData["tPrice"]));
+										}
+										@Html.DropDownList("tPrice",new[]
+										{
+										new SelectListItem{Text=" Giá đến ", Value="-1", Selected= (tPrice== -1)},
+										new SelectListItem{Text="0 VNĐ", Value="0", Selected= (tPrice== 0)},
+										new SelectListItem{Text="< 100.000 VNĐ", Value="100000", Selected= (tPrice==
+										100000)},
+										new SelectListItem{Text="< 200.000 VNĐ", Value="200000", Selected= (tPrice ==
+										200000)},
+										new SelectListItem{Text="< 500.000 VNĐ", Value="500000", Selected= (tPrice==
+										500000)},
+										new SelectListItem{Text="< 1.000.000 VNĐ", Value="1000000", Selected= (tPrice ==
+										1000000)},
+										new SelectListItem{Text="trên 1.000.000 VNĐ", Value="1000001", Selected= (tPrice
+										== 1000001)}
+										}, new { @name = "sStatus", @class="searchText form-control select col-12"})
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="form-group">
+										<button class="btn btn-success"
+											onclick="$('.searchText').removeAttr('disabled')" type="submit"><i
+												class="fa fa-search"></i></button>
+										<a class="btn btn-outline-info" asp-controller="Product" asp-action="Index"
+											asp-route-clear="clear">
+											<i class="fas fa-undo-alt"></i>
+										</a>
+									</div>
+								</div>
+							</div>
+						</form>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col">
+				<div class="product-grid" data-isotope='{ "itemSelector": ".product-item", "layoutMode": "fitRows" }'>
+					@if (Model.Item1.ToList().Count() > 0)
+					{
+						@foreach (var x in Model.Item1.ToList())
+						{
+							var existProdPromotion = promotiondata.Where(c => c.PromotionDetail.ProductId ==
+							x.Product.Id).FirstOrDefault();
+							var getCategory = lstCategory.FirstOrDefault(c => c.Id == x.Product.CategoryId);
+							var getbrand = lstBrand.FirstOrDefault(c => c.Id == x.Product.BrandId);
+
+							<div class="product-item @getCategory.Id @getbrand.Id">
+								<div class="product discount product_filter">
+									<div class="product_image">
+										@{
+											string image = "";
+											if (x.ProductVariations != null && x.ProductVariations.Count > 0)
+											{
+												var imgItem = x.ProductVariations.Select(c => c.Image).FirstOrDefault();
+												image = imgItem != null ? imgItem : "";
+											}
+										}
+										<img src="~/images/@image" style="height: 250px;" alt="">
+									</div>
+									<div class="favorite favorite_left"></div>
+									@if (existProdPromotion != null && existProdPromotion.Promotion.DiscountPercent == 1)
+									{
+										<div
+											class="product_bubble product_bubble_right product_bubble_red d-flex flex-column align-items-center">
+											<span>-@(existProdPromotion.Promotion.DiscountRate)%</span>
+										</div>
+									}
+									@if (existProdPromotion != null && existProdPromotion.Promotion.DiscountPercent == 0)
+									{
+										<div class="product_bubble product_bubble_right product_bubble_red d-flex flex-column align-items-center"
+											style="text-transform: none;">
+											<span>-@(existProdPromotion.Promotion.DiscountRate)đ</span>
+										</div>
+									}
+									<div class="product_info">
+										<h6 class="product_name">
+											<a href="single.html">@x.Product.Name</a>
+										</h6>
+
+										@if (existProdPromotion == null)
+										{
+											<div class="product_price">@string.Format("{0:0,0} đ",
+									Convert.ToDouble(x.Product.Price.ToString()))</div>
+										}
+										else
+										{
+											<div class="product_price">
+												@string.Format("{0:0,0} đ",
+									Convert.ToDouble(existProdPromotion.PromotionDetail.CurrentPrice.ToString()))
+												<span>@string.Format("{0:0,0} đ",
+										Convert.ToDouble(existProdPromotion.PromotionDetail.InitialPrice.ToString()))</span>
+											</div>
+										}
+
+									</div>
+								</div>
+								<div class="red_button add_to_cart_button">
+									<a href="/productdetail/@x.Product.Id">Xem chi tiết</a>
+								</div>
+							</div>
+						}
+					}
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			@if (pager.TotalPages > 0)
+			{
+				<ul class="pagination justify-content-end">
+					@if (pager.CurrentPage < pager.TotalPages)
+					{
+						<li class="page-item">
+								<a class="page-link" asp-controller="Product" asp-action="Index"
+									asp-route-pg="@(pager.CurrentPage - 1)">
+									Prev
+								</a>
+							</li>
+
+					}
+					
+					@for (var pge = pager.StartPage; pge <= pager.EndPage; pge++)
+					{
+						@if (pge == checkPg)
+						{
+							<li class="page-item @(pge == pager.CurrentPage ? "Active" : "")">
+								<a class="page-link" asp-controller="Product" style="color: white; background-color: #206af1;"
+									asp-action="Index" asp-route-pg="@pge">@pge</a>
+							</li>
+						}
+						else
+						{
+							<li class="page-item @(pge == pager.CurrentPage ? "Active" : "")">
+								<a class="page-link" asp-controller="Product" asp-action="Index" asp-route-pg="@pge">@pge</a>
+							</li>
+						}
+					}
+
+
+					@if (pager.CurrentPage < pager.TotalPages)
+					{
+						<li class="page-item">
+							<a class="page-link" asp-controller="Product" asp-action="Index"
+								asp-route-pg="@(pager.CurrentPage + 1)">
+								Next
+							</a>
+						</li>
+
+					}
+				</ul>
+			}
+		</div>
+	</div>
+</div>
+</div>
+
+<div class="deal_ofthe_week">
+	<div class="container">
+		<div class="row align-items-center">
+			<div class="col-lg-6">
+				<div class="deal_ofthe_week_img">
+					<img src="/images/deal_ofthe_week.png" alt="">
+				</div>
+			</div>
+			<div class="col-lg-6 text-right deal_ofthe_week_col">
+				<div class="deal_ofthe_week_content d-flex flex-column align-items-center float-right">
+					<div class="section_title">
+						<h2>Deal Of The Week</h2>
+					</div>
+					<ul class="timer">
+						<li class="d-inline-flex flex-column justify-content-center align-items-center">
+							<div id="day" class="timer_num">03</div>
+							<div class="timer_unit">Ngày</div>
+						</li>
+						<li class="d-inline-flex flex-column justify-content-center align-items-center">
+							<div id="hour" class="timer_num">15</div>
+							<div class="timer_unit">Giờ</div>
+						</li>
+						<li class="d-inline-flex flex-column justify-content-center align-items-center">
+							<div id="minute" class="timer_num">45</div>
+							<div class="timer_unit">Phút</div>
+						</li>
+						<li class="d-inline-flex flex-column justify-content-center align-items-center">
+							<div id="second" class="timer_num">23</div>
+							<div class="timer_unit">Giây</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+

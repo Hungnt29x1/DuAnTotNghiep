@@ -1,0 +1,414 @@
+﻿@model GProject.WebApplication.Models.ProductMGRDTO
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.Api.MyServices.Services;
+@using GProject.Data.DomainClass;
+@using GProject.WebApplication.Helpers;
+@{
+    ViewBag.Title = "Danh sách thông tin sản phẩm";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    Pager pager = new Pager();
+    int pageNo = 0;
+
+    if (ViewBag.Pager != null)
+    {
+        pager = ViewBag.Pager;
+        pageNo = pager.CurrentPage;
+    }
+
+    var lstBrand = await Commons.GetAll<Brand>(String.Concat(Commons.mylocalhost, "Brand/get-all-Brand"));
+    IList<SelectListItem> StoreItems = new List<SelectListItem>();
+    if (lstBrand.Count > 0)
+    {
+        StoreItems.Add(new SelectListItem()
+                {
+                    Value = "",
+                    Text = "--Nhãn hiệu--",
+                    Selected = "-1" == Model.BrandId.ToString(),
+                });
+
+        foreach (var br in lstBrand)
+        {
+            StoreItems.Add(new SelectListItem()
+                    {
+                        Value = br.Id.ToString(),
+                        Text = br.Name,
+                        Selected = br.Id == Model.BrandId,
+                    });
+        }
+    }
+
+    var lstCategory = await Commons.GetAll<Category>(String.Concat(Commons.mylocalhost, "Category/get-all-Category"));
+	IList<SelectListItem> CategoryItems = new List<SelectListItem>();
+	if (lstCategory.Count > 0)
+	{
+		CategoryItems.Add(new SelectListItem()
+				{
+					Value = "",
+					Text = "-- Danh mục --",
+					Selected = "-1" == Model.CategoryId.ToString(),
+				});
+
+		foreach (var br in lstCategory.Where(x => x.Status == 1))
+		{
+			CategoryItems.Add(new SelectListItem()
+					{
+						Value = br.Id.ToString(),
+						Text = br.Name,
+						Selected = br.Id.ToString() == Model.CategoryId.ToString(),
+					});
+		}
+	}
+}
+<style>
+    label {
+        color: black;
+    }
+
+    h1 {
+        color: black;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0px;
+        z-index: 1;
+        background-color: #E5E5E5;
+    }
+
+    .sticky-table {
+        border-collapse: separate !important;
+    }
+
+    .campic i {
+        font-size: 35px;
+        color: #000;
+        margin: 5px 0;
+        cursor: pointer;
+    }
+
+    .campic input[type="file"] {
+        display: block;
+    }
+
+    .pip-file {
+        position: relative;
+    }
+
+    .picThumb {
+        max-height: 200px;
+        border: 1px solid;
+        padding: 1px;
+        cursor: pointer;
+    }
+
+    .remove-img {
+        position: absolute;
+        bottom: 25px;
+        right: -5px;
+    }
+
+    .campic .remove-img i {
+        font-size: 20px;
+        color: #fff;
+        cursor: pointer;
+        background: red;
+        margin: 0;
+        padding: 1px 4px 4px;
+        border-radius: 20px;
+    }
+</style>
+
+
+<div class="container">
+    @if (@ViewData["Mess"] != null)
+{
+    <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+}
+
+<button class="btn btn-success" onclick="location.href='@Url.Action("Create", "ProductMGR")'" type="button">Thêm mới</button>
+<button class="btn btn-outline-secondary text-dark" id="changeformsearch" type="button" onclick="ChangeSearch()">Tìm kiếm</button>
+<hr style="color:red;" />
+
+<form id="Searchform" name="searchForm" method="post" class="form-horizontal" action="/ProductMGR/Index">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="">Mã sản phẩm</label>
+                                <div class="col-md-9 col-xs-12">
+                                    <input id="sId" name="sId" value="@ViewData["sId"]" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="">Giá nhập</label>
+                                <div class="col-md-9 col-xs-12">
+                                    <input type="number" id="sImportPrice" name="sImportPrice" min="0" oninput="this.value = Math.abs(this.value)" value="@ViewData["sImportPrice"]" class="form-control" />
+                                </div>
+                            </div>    
+                             <div class="form-group">
+                                <label class="">Trạng thái</label>
+                                <div class="col-md-9">
+                                    @{
+                                        int status = int.Parse(Html.Encode(ViewData["sStatus"]));
+                                    }
+                                    @Html.DropDownList("sStatus",new[]
+                                    {
+                                    new SelectListItem{Text="-- Tất cả--", Value="-1", Selected= (status== -1)},
+                                    new SelectListItem{Text="Đang bán", Value="0", Selected= (status== 0)},
+                                    new SelectListItem{Text="Ngừng bán", Value="1", Selected=  (status == 1)}
+                                    }, new { @name = "sStatus", @class="searchText form-control select"})
+                                </div>
+                            </div>                   
+                        </div>
+
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="">Tên sản phẩm</label>
+                                <div class="col-md-9 col-xs-12">
+                                    <input type="text" id="sName" name="sName" value="@ViewData["sName"]" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="">Giá bán</label>
+                                <div class="col-md-9">
+                                    <input type="number" id="sPrice" name="sPrice" min="0" oninput="this.value = Math.abs(this.value)" value="@ViewData["sPrice"]" class="form-control" />
+                                </div>
+                            </div>                                                          
+                        </div>
+
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="">Nhãn hiệu</label>
+                                <div class="col-md-9 col-xs-12">
+                                    @Html.DropDownList("sBrand", StoreItems, new { @maxlength = "30", @class =
+										"searchText form-control col-12", @name="sBrand" })                     
+                                </div>
+                            </div>  
+                            <div class="form-group">
+                                <label class="">Danh mục</label>
+                                <div class="col-md-9 col-xs-12">
+                                    @Html.DropDownList("category", CategoryItems, new { @maxlength = "30", @class =
+										"searchText form-control col-12", @name="category" })                    
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer text-center">
+                    <button class="btn btn-success" onclick="$('.searchText').removeAttr('disabled')" type="submit"><i class="fa fa-search"></i></button>
+                    <a class="btn btn-outline-info" asp-action="Index">
+                            <i class="fas fa-undo-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="row">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title" style="text-align:center; height:50px; padding:10px 10px 10px 10px;">Danh sách sản phẩm</h3>
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive" style="overflow-y: auto; max-height: 700px;">
+                <table class="table table-bordered table-hover sticky-table">
+                    <thead class="sticky-header">
+                        <tr>
+                            <th style="width: 35px;">STT</th>
+                            <th style ="width:100px;">Hình ảnh</th>
+                            <th>Mã sản phẩm</th>
+                            <th style="width:220px;">Tên sản phẩm</th>                           
+                            <th>Nhãn hiệu</th>
+                            <th>Giá nhập</th>
+                            <th>Giá bán</th>                          
+                            <th>Mô tả</th>
+                            <th>Trạng thái</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.ProductList != null)
+                        {
+                            int i = 1;
+                            @foreach (var item in Model.ProductList)
+                            {
+                                string img = Model.ProductVariationList.Where(c => c.ProductId == item.Id).Select(c => c.Image).FirstOrDefault().NullToString();
+                                <tr>
+                                    <td class="text-center">@i</td>
+                                    <td>
+                                        <img style="width:120px;height:130px;" src="~/images/@img" />
+                                    </td>
+                                    <td>
+                                        @item.ProductCode
+                                    </td>
+                                    <td>
+                                        @item.Name
+                                    </td>                                    
+                                    <td>
+                                        @(lstBrand.Where(c => c.Id == item.BrandId).Select(c => c.Name).FirstOrDefault())
+                                    </td>
+                                    <td>
+                                        @(item.ImportPrice.ToString("#,##0##")) đ
+                                    </td>
+                                    <td>
+                                        @(item.Price.ToString("#,##0##")) đ
+                                    </td>                                   
+                                    <td>
+                                        @item.Description
+                                    </td>
+                                    <td>
+                                        @{
+                                            if (item.Status == 0)
+                                            {
+                                                <button type="button" class="btn btn-outline-success" onclick="ChangeStatus('@item.Id')"><i class="fas fa-toggle-on"></i></button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-outline-danger"  onclick="ChangeStatus('@item.Id')"><i class="fas fa-toggle-off"></i></button>
+                                            }
+                                        }
+                                    </td>
+                                    <td>                                        
+                                        <button class="btn btn-info" onclick="location.href='@Url.Action("Update", "ProductMGR",new { id = item.Id})'" />
+                                        <i class="fas fa-pen-square"></i>
+                                    </td>
+                                </tr>
+                                i++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="form-footer" >
+			<div style="float: right">
+                @if (pager.TotalPages > 0)
+			{
+				<ul class="pagination justify-content-end">
+					@if (pager.CurrentPage < pager.TotalPages)
+					{
+						<li class="page-item">
+							<a class="page-link" asp-controller="ProductMGR" asp-action="Index"
+						asp-route-pg="@(pager.TotalPages)">Prev</a>
+						</li>
+					}
+					@for (var pge = pager.StartPage; pge <= pager.EndPage; pge++)
+					{
+						<li class="page-item @(pge == pager.CurrentPage ? "Active" : "")">
+							<a class="page-link" asp-controller="ProductMGR" asp-action="Index" asp-route-pg="@pge">@pge</a>
+						</li>
+					}
+
+
+					@if (pager.CurrentPage < pager.TotalPages)
+					{
+						<li class="page-item">
+							<a class="page-link" asp-controller="ProductMGR" asp-action="Index"
+						asp-route-pg="@(pager.CurrentPage + 1)">Next</a>
+						</li>
+
+					}
+				</ul>
+			}
+            </div>
+		</div>
+    </div>
+</div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        if ($("#sName").val() != '' ||
+            $("#sId").val() != '' ||
+            $("#sBrand").val() != '' ||
+            $("#category").val() != '' ||
+            $("#sImportPrice").val() != '' ||
+            $("#sPrice").val() != ''
+        ) 
+        {
+            $('#Searchform').show();
+        }
+        else{
+            $('#Searchform').hide();
+        }
+
+        $('#formdata').hide();
+        var er = document.getElementById('error')
+        if (er != null) {
+            if ($('#error').text() == 'Failed')
+                swal("Không thành công", "Vui lòng xem lại thông tin đã nhập", "error");
+            else
+                swal("Thành công", "Bạn đã lưu thành công thông tin đã nhập", "success");
+        }
+    });
+
+    function ChangeStatus(id) {
+        $.getJSON("/ProductMGR/ChangeStatus?id=" + id, function (data) {
+            if(data == true)
+                swal("Thành công", "Thay đổi trạng thái thành công", "success");
+            else
+                swal("Không thành công", "Thay đổi trạng thái không thành công", "error");
+            location.reload()
+        });
+    }
+
+    function ChangeSearch() {
+        if ($("#changeformsearch").text() == "Tìm kiếm") {
+            $('#Searchform').show();
+            //$("#ExpirationDate").val(new Date().toJSON().slice(0,19));
+            $("#changeformsearch").text("Hủy tìm kiếm");
+        } else if ($("#changeformsearch").text() == "Hủy tìm kiếm") {
+            $('#Searchform').hide();
+            $("#changeformsearch").text("Tìm kiếm");
+        }
+    }
+
+    function btnClose() {
+        $('#ViewDetail').modal('hide');
+    }
+
+    function checkValidateData() {
+        if ($('#Name').val() == '') {
+            sweetAlert("Thông báo", "Thông tin tên sản phẩm không được để trống", "error");
+            return false;
+        }
+        if (parseFloat($('#BrandId').val()) == -1) {
+            sweetAlert("Thông báo", "Thông tin tên sản phẩm không được để trống", "error");
+            return false;
+        }
+        if ($('#ImportPrice').val() == '') {
+            sweetAlert("", "Thông tin giá nhập không được để trống", "error");
+            return false;
+        }
+        if (isNaN($('#ImportPrice').val())) {
+            sweetAlert("", "Thông tin giá nhập chỉ bao gồm kí tự số", "error");
+            return false;
+        }
+        if (parseFloat($('#ImportPrice').val() || 0) < 0 || parseFloat($('#ImportPrice').val() || 0) === 0) {
+            sweetAlert("", "Thông tin giá nhập phải có giá trị lớn hơn 0", "error");
+            return false;
+        }
+        if ($('#Price').val() == '') {
+            sweetAlert("", "Thông tin giá bán không được để trống", "error");
+            return false;
+        }
+        if (isNaN($('#Price').val())) {
+            sweetAlert("", "Thông tin giá bán chỉ bao gồm kí tự số", "error");
+            return false;
+        }
+        if (parseFloat($('#Price').val() || 0) < 0 || parseFloat($('#ImportPrice').val() || 0) === 0) {
+            sweetAlert("", "Thông tin giá bán phải có giá trị lớn hơn 0", "error");
+            return false;
+        }
+        return true;
+    }
+</script>

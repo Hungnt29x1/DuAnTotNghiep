@@ -1,0 +1,423 @@
+﻿@*@model GProject.WebApplication.Models.ColorDTO*@
+@model X.PagedList.IPagedList<GProject.Data.DomainClass.Color>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.Api.MyServices.Services;
+@{
+    ViewBag.Title = "Quản lý màu sắc";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<style>
+    label {
+        color: black;
+    }
+
+    h1 {
+        color: black;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0px;
+        z-index: 1;
+        background-color: #E5E5E5;
+    }
+
+    .sticky-table {
+        border-collapse: separate !important;
+    }
+</style>
+
+<div class="container">
+    @if (@ViewData["Mess"] != null)
+    {
+        <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+    }
+    
+
+    <div>
+        <button type="button" class="btn btn-success" onclick="ShowModal()">Thêm mới</button>
+    </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Màu sắc</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="Clear()"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formdata" class="form" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input id="Id" name="Id" hidden="hidden" />
+                        <div class="form-group">
+                            <label class="col-md-5">Mã Màu:</label>
+                            <div class="form-input">
+                                <input id="HEXCode" name="HEXCode" placeholder="Hex code (#)" maxlength="15"
+                                    class="form-control" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-5">Tên Màu:</label>
+                            <div class="form-input">
+                                <input id="Name" name="Name" placeholder="Color name" maxlength="200"
+                                    class="form-control" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-5">Hình ảnh:</label>
+                            <div class="form-input">
+                                <input id="Image_Upload" value="" name="Image_Upload" type="file" multiple
+                                    class="form-control" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Trạng thái</label>
+                            <div>
+                                <select id="Status" name="Status" class="form-control">
+                                    <option value="1">Sử dụng</option>
+                                    <option value="0">Không sử dụng</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="Clear()"
+                                data-bs-dismiss="modal">Close</button>
+                            <button id="btnSave" class="btn btn-success" type="submit">Lưu</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr style="color:red;" />
+
+
+    <form id="Searchform" name="searchForm" method="post" class="form-horizontal" action="/Color/Index">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-4"></div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="col-12 col-xs-12">
+                                        <input placeholder="Tìm kiếm theo mã màu..." id="sHEXCode" name="sHEXCode" value="@ViewData["sHEXCode"]"
+                                            class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <div class="col-12 col-xs-12">
+                                       <input placeholder="Tìm kiếm theo tên" id="sName" name="sName" value="@ViewData["sName"]"
+                                            class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <button class="btn btn-success" onclick="$('.searchText').removeAttr('disabled')" type="submit">
+                                                <i class="fa fa-search"></i>
+                                            </button>
+                                        </div> 
+                                        <div class="col-4">
+                                            <a class="btn btn-outline-info" asp-action="Index">
+                                                <i class="fas fa-undo-alt"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title" style=" text-align:center; height:50px; padding:10px 10px 10px 10px;"><i
+                        class="fa fa-tachometer" aria-hidden="true" style="margin-right:10px;"></i>
+                    Danh sách màu sắc
+                </h3>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive" style="overflow-y: auto; max-height: 700px;">
+                    <table class="table table-bordered table-hover sticky-table">
+                        <thead class="sticky-header">
+                            <tr>
+                                <th style="width: 35px;">STT</th>
+                                <th>Mã Màu</th>
+                                <th>Tên Màu</th>
+                                <th>Hình ảnh</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null)
+                            {
+                                int i = 1;
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="text-center">@i</td>
+                                        <td>
+                                            @item.HEXCode
+                                        </td>
+                                        <td>
+                                            @item.Name
+                                        </td>
+                                        <td>
+                                            <img style="width:120px;height:50px; border;1px solid;"
+                                                src="~/images/@item.Image" />
+                                        </td>
+                                        <td>
+                                            @(item.Status == 1 ? "Đang sử dụng" : "Không sử dụng")
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-info" onclick="ViewDetailDataColor('@item.Id')" />
+                                            <i class="fas fa-pen-square" aria-hidden="true"></i>
+                                            <button class="btn btn-danger delete" onclick="deleteObject('@item.Id')">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <div style="float: right">
+                    @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page }), new
+                    X.PagedList.Web.Common.PagedListRenderOptions()
+                    {
+                    ActiveLiElementClass = "active",
+                    PageClasses = new[]{ "page-link"},
+                    LiElementClasses=new[] { "page-item" },
+                    LinkToNextPageFormat = "Next",
+                    LinkToPreviousPageFormat = "Prev", 
+                    })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function deleteObject(id) {
+        $.ajax({
+            url: "/Color/CheckExistId",
+            data: { "Id": id },
+            type: "POST",
+            success: function (result) {
+                if (result.success) {
+
+                    swal("Bạn có muốn xóa thông tin màu sắc này không?", {
+                        title: 'Thông Báo!',
+                        icon: 'info',
+                        buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
+                    }).then(function (isConfirm) {
+                        if (isConfirm) {
+                            $.ajax({
+                        url: "/Color/Delete",
+                        data: { "Id": id },
+                        type: "POST",
+                        success: function (result) {
+                            if (result.success) {
+                                // Thành công, làm gì đó ở đây
+                                swal("Thành công", "Bạn đã xóa thành công", "success");
+
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 2000);
+                                Clear()
+                            } else {
+                                // Lỗi, hiển thị thông báo lỗi
+                                swal("Thành công!", "Bạn đã xóa thành công", "success");
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 2000);
+                                Clear()
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert(error);
+                        }
+                    });
+                        } else {
+                            swal("Đã hủy", "Xóa không thành công!", "error");
+                        }
+                    });
+
+
+                    
+                } else {
+                    swal("Xin lỗi", "Màu này đã được sử dụng.", "error");
+                }
+            },
+            error: function (xhr, status, error) {
+                // Lỗi, hiển thị thông báo lỗi
+                alert(error);
+            }
+        });
+    }
+    $(document).ready(function () {
+
+        var er = document.getElementById('error')
+        if (er != null) {
+            if ($('#error').text() == 'Failed')
+                swal("Không thành công", "Vui lòng xem lại thông tin đã nhập", "error");
+            else
+                swal("Thành công", "Bạn đã lưu thành công thông tin đã nhập", "success");
+        }
+    });
+
+    function ShowModal() {
+        $("#exampleModal").modal('show');
+    }
+
+    function validateHEXCode(code) {
+        var regex = /^#[a-zA-Z0-9]+$/;
+        return regex.test(code);
+    }
+    document.querySelector('#formdata').addEventListener('submit', function (e) {
+        var form = this;
+
+        e.preventDefault();
+        if (checkValidateData()) {
+        }
+    });
+
+    function ViewDetailDataColor(id) {
+        $("#exampleModal").modal('show');
+        $.getJSON("/Color/Detail?id=" + id, function (data) {
+            $("#Name").val(data.name);
+            $("#HEXCode").val(data.hexCode);
+            $("#Id").val(data.id);
+            $("#Status").val(data.status);
+            $("#exampleModal").modal('show');
+        });
+    }
+    function Clear() {
+        $("#Name").val('');
+        $("#HEXCode").val('');
+        $("#Id").val('');
+        $("#Status").val('');
+    }
+
+    function checkValidateData() {
+        if ($('#HEXCode').val() == '') {
+            sweetAlert("Thông báo", "Thông tin mã màu không được để trống", "error");
+            return false;
+        }
+        if (!validateHEXCode($('#HEXCode').val())) {
+            sweetAlert("Thông báo", "Thông tin mã màu không đúng định dạng", "error");
+            return false;
+        }
+        if ($('#Name').val() == '') {
+            sweetAlert("Thông báo", "Thông tin tên màu không được để trống", "error");
+            return false;
+        }
+        if ($('#Image_Upload').val() == '') {
+            sweetAlert("Thông báo", "Thông tin hình ảnh không được để trống", "error");
+            return false;
+        }
+        return true;
+    }
+
+    $(document).ready(function () {
+        $("#btnSave").click(function () {
+            if ($('#HEXCode').val() == '') {
+                sweetAlert("Thông báo", "Thông tin mã màu không được để trống", "error");
+                return false;
+            }
+            if (!validateHEXCode($('#HEXCode').val())) {
+                sweetAlert("Thông báo", "Thông tin mã màu không đúng định dạng", "error");
+                return false;
+            }
+            if ($('#Name').val() == '') {
+                sweetAlert("Thông báo", "Thông tin tên màu không được để trống", "error");
+                return false;
+            }
+            if ($('#Image_Upload').val() == '') {
+            sweetAlert("Thông báo", "Thông tin hình ảnh không được để trống", "error");
+            return false;
+        }
+            var id = $("#Id").val();
+            var hexcode = $("#HEXCode").val();
+            var name = $("#Name").val();
+            var status = $("#Status").val();
+            var image = $("#Image_Upload").get(0).files[0];
+            var data = new FormData();
+            data.append('Id', id);
+            data.append('HEXCode', hexcode);
+            data.append('Name', name);
+            data.append('Status', status);
+            data.append('Image_Upload', image);
+            $.ajax({
+                url: "/Color/CheckHEXCode",
+                type: "POST",
+                data: { HEXCode: hexcode, Id: id },
+                success: function (result) {
+                    if (result.success) {
+                        $.ajax({
+                            url: "/Color/CheckName",
+                            type: "POST",
+                            data: { Name: name, Id: id },
+                            success: function (result) {
+                                if (result.success) {
+                                    //var data = { Id: id, HEXCode: hexcode, Name: name, Image_Upload: image };
+                                    $.ajax({
+                                        url: "/Color/Save",
+                                        type: "POST",
+                                        data: data,
+                                        contentType: false,
+                                        processData: false,
+                                        success: function (result) {
+                                            if (result.success) {
+                                                swal("Thành công", "Bạn đã lưu thành công thông tin đã nhập", "success");
+                                                setTimeout(function () {
+                                                    location.reload();
+                                                }, 2000);
+                                                Clear()
+                                            } else {
+                                                swal("Thành công!", "Bạn đã lưu thành công thông tin đã nhập", "success");
+                                                setTimeout(function () {
+                                                    location.reload();
+                                                }, 2000);
+                                                Clear()
+                                            }
+                                        },
+                                        error: function (xhr, status, error) {
+                                            alert(error);
+                                        }
+                                    });
+                                } else {
+                                    swal("Lỗi", "Tên đã được sử dụng, vui lòng nhập tên khác", "error");
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        swal("Lỗi", "Mã đã được sử dụng, vui lòng nhập mã khác", "error");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert(error);
+                }
+            });
+        });
+    });
+</script>

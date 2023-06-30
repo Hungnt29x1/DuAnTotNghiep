@@ -1,0 +1,153 @@
+﻿@model GProject.WebApplication.Models.UserInfoDTO
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+    <!-- Meta tag Keywords -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="Smart Login Form Responsive Widget,Login form widgets, Sign up Web forms , Login signup Responsive web form,Flat Pricing table,Flat Drop downs,Registration Forms,News letter Forms,Elements" />
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
+    <link rel="stylesheet" href="~/css/Login.css" asp-append-version="true">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <style>
+        #btnAction {
+            display: inline-block;
+            font-size: 20px;
+            padding: 10px 10px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: black;
+            background-color: white;
+            border: none;
+            border-radius: 15px;
+            border: 2px solid Red;
+            margin: 10px 20px;
+        }
+
+            #btnAction:hover {
+                background-color: Red; /* Green */
+                color: white;
+            }
+
+            #btnAction:active {
+                background-color: #3e8e41;
+                box-shadow: 0 5px #666;
+                transform: translateY(4px);
+            }
+    </style>
+</head>
+<body>
+    @if (@ViewData["Mess"] != null)
+    {
+        <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+    }
+    <section class="vh-100">
+        <div class="container-fluid h-custom">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-md-7 mx-4">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+                         class="img-fluid col-md-12" alt="Sample image">
+                </div>
+                <div class="col-md-3">
+                    <div class="divider d-flex align-items-center my-4" style="justify-content:center;">
+                            <img src="/images/imageLogo.PNG" style="width:80%;height:80%;" />
+                        </div>
+                        <h3 class="text-center">Đăng nhập</h3>
+                    <form id="formdata" asp-action="Login" class="form" onsubmit="return validateLoginForm();">
+                        <input type="text" name="returnUrl" id="returnUrl" hidden value="@ViewBag.returnUrl" />
+                        
+
+                        
+
+                        <!-- Email input -->
+                        <div class="form-outline mb-4">
+                            <label class="form-label" for="form3Example3">Email:</label>
+                            <input asp-for="Email" type="email" name="Email" id="form3Example3" class="form-control form-control-lg"
+                                   placeholder="name@example.com" />
+                        </div>
+
+                        <!-- Password input -->
+                        <div class="form-outline mb-3">
+                            <label class="form-label" for="form3Example4">Mật khẩu:</label>
+                            <input asp-for="password" type="password" id="form3Example4" class="form-control form-control-lg"
+                                   placeholder="password" />
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- Checkbox -->
+                            <div class="form-check mb-0">
+                                <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
+                                <label class="form-check-label" for="form2Example3">
+                                    Nhớ tài khoản
+                                </label>
+                            </div>
+                            <a href="/quen-mat-khau.html" class="text-body">Quên mật khẩu?</a>
+                        </div>
+                        <div class="d-flex justify-content-center text-center text-lg-start mt-4 pt-2">
+                            <button type="submit" class="btn btn-primary btn-lg"
+                                    style="padding-left: 2.5rem; padding-right: 2.5rem;">
+                                Đăng nhập
+                            </button>
+                        </div>
+
+                    </form>
+                    <div class="d-flex justify-content-center text-center">
+                        <a type="button" id="btnAction" asp-controller="Account" asp-action="ExternalLogin" asp-route-provider="Google" asp-route-returnurl="@ViewBag.returnUrl" class="btn btn-default col-md-7"><img src="~/images/logoGoogle.PNG" style="border-radius:50%;" />Đăng nhập với Google</a>
+                    </div>
+                    
+                    <div class="text-center text-lg-start mt-4 pt-2">
+                        <p class="small ">                           
+                                Bạn chưa có chưa khoản? <a href="/Account/register"
+                                                           class="link-primary">Đăng kí ngay</a>    
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var er = document.getElementById('error')
+        if (er != null) {
+            if ($('#error').text() == 'Failed')
+                swal("Đăng nhập không thành công", "Tài khoản hoặc mật khẩu không chính xác", "error");
+        }
+        $.ajax({
+            data: {
+                str: window.location.protocol + '//' + window.location.host
+            },
+            contentType: 'application/json',
+            dataType: 'json',
+            url: '/Account/GetLocalhost',
+            type: 'GET'
+        });
+    });
+    function validateLoginForm() {
+        var email = document.getElementById('form3Example3').value;
+        var password = document.getElementById('form3Example4').value;
+
+        if (email.trim() === '') {
+            sweetAlert("Thông báo", "Thông tin email không được để trống", "error");
+            return false;
+        }
+        if (password.trim() === '') {
+            sweetAlert("Thông báo", "Thông tin mật khẩu không được để trống", "error");
+            return false;
+        }
+        return true;
+    }
+    document.querySelector('.img__btn').addEventListener('click', function () {
+        document.querySelector('.cont').classList.toggle('s--signup');
+    });
+</script>

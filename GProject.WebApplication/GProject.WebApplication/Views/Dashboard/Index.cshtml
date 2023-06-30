@@ -1,0 +1,320 @@
+﻿@model List<GProject.WebApplication.Models.MyChartData>
+
+@{
+    ViewData["Title"] = "Trang chủ";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    List<ProductStaticalDTO> ProductStaticals = (List<ProductStaticalDTO>)ViewData["ProductStatical"];
+    List<CategoryStaticalDTP> categoryStaticals = (List<CategoryStaticalDTP>)ViewData["CategoryStatical"];
+
+    var labels = new List<string>();
+    var data = new List<decimal>();
+    var backgroundColor = new List<string>();
+    var hoverBackgroundColor = new List<string>();
+
+    foreach (var result in categoryStaticals)
+    {
+        labels.Add(result.CategoryName);
+        data.Add(result.TotalRevenue);
+        backgroundColor.Add("#" + Guid.NewGuid().ToString().Substring(0, 6));
+        hoverBackgroundColor.Add("#" + Guid.NewGuid().ToString().Substring(0, 6));
+    }
+}
+<div class="row">
+    <div class="col-md-7">
+        <h3>Thống kê</h3>
+    </div>
+    <div class="col-md-5">
+        <form id="Searchform" name="searchForm" method="post" class="form-horizontal" action="/Dashboard/Index">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group row">
+                        <label >Từ</label>
+                        <div class="col-md-12">
+                            <input type="date" id="fromDate" name="fromDate" style="margin-top: -5px; background-color: white; text-align: center;" value="@ViewData["fromDate"]" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group row">
+                        <label >Đến</label>
+                        <div class="col-md-12">
+                            <input type="date" id="toDate" name="toDate" style="margin-top: -5px; background-color: white; text-align: center;" value="@ViewData["toDate"]" class="form-control col-12" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mt-2">
+                    <label></label>
+                    <div class="col-md-12" style="margin-top: -5px;">
+                        <button class="btn btn-success" type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
+                    </div>
+                    
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<hr style="color:red;" />
+<div class="container-fluid">
+    <!-- ============================================================== -->
+    <!-- Three charts -->
+    <!-- ============================================================== -->
+    <div class="row justify-content-center">
+        <div class="col-lg-3 col-md-12">
+            <div class="white-box analytics-info" style="border: 1px solid #3399CC;">
+                <h5 class=""><i class="fa fa-shopping-bag" style="margin-right:10px;"></i>Số đơn hàng</h5>
+                <ul class="list-inline two-part d-flex align-items-center mb-0">
+                    <li>
+                        <div id="sparklinedash">
+                            <canvas width="67" height="30"
+                                    style="display: inline-block; width: 67px; height: 30px; vertical-align: top;"></canvas>
+                        </div>
+                    </li>
+                    <li class="ms-auto">
+                        <span class="counter text-secondary" title="@(ViewBag.CountOrderInProgress) đơn chờ xác nhận">@(ViewBag.CountOrderInProgress) <i class="fa fa-shopping-bag"></i></span>
+                        <span class="counter text-info" title="@(ViewBag.CountOrderDelivery) đơn đang giao">@(ViewBag.CountOrderDelivery) <i class="fa fa-shopping-bag"></i></span>
+                        <span class="counter text-success" title="@(ViewBag.CountOrderComplete) đơn hoàn thành">@(ViewBag.CountOrderComplete) <i class="fa fa-shopping-bag"></i></span>
+                        <span class="counter text-danger" title="@(ViewBag.CountOrderCanceled) đơn bị hủy">@(ViewBag.CountOrderCanceled) <i class="fa fa-shopping-bag"></i></span>
+                        </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-12">
+            <div class="white-box analytics-info" style="border: 1px solid #33FF66;">
+                <h5 class=""><i class="fa fa-cubes" style="margin-right:10px;"></i>Số lượng sản phẩm</h5>
+                <ul class="list-inline two-part d-flex align-items-center mb-0">
+                    <li>
+                        <div id="sparklinedash2">
+                            <canvas width="67" height="30"
+                                    style="display: inline-block; width: 67px; height: 30px; vertical-align: top;"></canvas>
+                        </div>
+                    </li>
+                    <li class="ms-auto"><span class="counter text-purple">@(ViewBag.CountProduct) <i class="fa fa-cubes"></i></span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-12">
+            <div class="white-box analytics-info" style="border: 1px solid #FFCC33;">
+                <h5 class=""><i class="fa fa-users" style="margin-right: 10px;"></i>Số khách hàng</h5>
+                <ul class="list-inline two-part d-flex align-items-center mb-0">
+                    <li>
+                        <div id="sparklinedash3">
+                            <canvas width="67" height="30"
+                                    style="display: inline-block; width: 67px; height: 30px; vertical-align: top;"></canvas>
+                        </div>
+                    </li>
+                    <li class="ms-auto">
+                        <span class="counter text-info" title="@(ViewBag.CountCustomer) khách hàng">@(ViewBag.CountCustomer) <i class="fa fa-users"></i></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-12">
+            <div class="white-box analytics-info" style="border: 1px solid #CC0000;">
+                <h5 class=""><i class="fa fa-clone" style="margin-right: 10px;"></i>Lượt tương tác</h5>
+                <ul class="list-inline two-part d-flex align-items-center mb-0">
+                    <li>
+                        <div id="sparklinedash4">
+                            <canvas width="67" height="30"
+                                    style="display: inline-block; width: 67px; height: 30px; vertical-align: top;"></canvas>
+                        </div>
+                    </li>
+                    <li class="ms-auto">
+                        <span class="counter text-info" title="@(ViewBag.CountEvaluate) lượt bình luận, đánh giá"> @(ViewBag.CountEvaluate) <i class="fa fa-comments" aria-hidden="true"></i></span>
+                        <span class="counter text-info" title="@(ViewBag.CountView) lượt xem"> @(ViewBag.CountView) <i class="fa fa-eye" aria-hidden="true"></i></span>
+                        <span class="counter text-info" title="@(ViewBag.CountLike) lượt thích"> @(ViewBag.CountLike) <i class="fa fa-thumbs-up"></i></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- ============================================================== -->
+    <!-- PRODUCTS YEARLY SALES -->
+    <!-- ============================================================== -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="white-box" id="chart-container">
+                <h5 class="">Tổng doanh thu</h5>
+                <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12">
+                    <canvas id="myChart" class="col-md-12 w-100 h-100" style="box-sizing: border-box;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="white-box">
+                <h5 class="">Doanh thu theo mục sản phẩm</h5>
+                <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12">
+                    <canvas id="myPieChart" class="col-md-12" style="box-sizing: border-box; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ============================================================== -->
+    <!-- RECENT SALES -->
+    <!-- ============================================================== -->
+    <div class="row">
+        <div class="col-md-12 col-lg-12 col-sm-12">
+            <div class="white-box">
+                <div class="d-md-flex mb-3">
+                    <h3 class=" mb-0">Bảng xếp hạng doanh số sản phẩm theo tháng</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="table no-wrap">
+                        <thead>
+                            <tr>
+                                <th class="border-top-0">STT</th>
+                                <th class="border-top-0">Tháng</th>
+                                <th class="border-top-0">Tên sản phẩm</th>
+                                <th class="border-top-0">Loại danh mục</th>
+                                <th class="border-top-0">Nhãn hiệu</th>
+                                <th class="border-top-0">Loại sản phẩm</th>
+                                <th class="border-top-0">Số lượng</th>
+                                <th class="border-top-0">Doanh số</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < ProductStaticals.Count(); i++)
+                            {
+                                string productType = "";
+                                foreach (var item in ProductStaticals[i].ProdType.Split(',').Distinct().ToList())
+                                {
+                                    switch (item)
+                                    {
+                                        case "0":
+                                            productType += "Sản phẩm bình thường";
+                                            break;
+                                        case "1":
+                                            productType += "Sản phẩm mới";
+                                            break;
+                                        case "2":
+                                            productType += "Sản phẩm nổi bật";
+                                            break;
+                                        case "3":
+                                            productType += "Sản phẩm được yêu thích";
+                                            break;
+                                        case "4":
+                                            productType += "Sản phẩm khuyến mại";
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                                <tr>
+                                    <td>@(i+1)</td>
+                                    <td class="txt-oflo">Tháng @(ProductStaticals[i].CreateDate)</td>
+                                    <td class="txt-oflo">@ProductStaticals[i].ProdName</td>
+                                    <td class="txt-oflo">@ProductStaticals[i].Category</td>
+                                    <td class="txt-oflo">@ProductStaticals[i].Brand</td>
+                                    <td class="txt-oflo">@productType</td>
+                                    <td class="txt-oflo">@ProductStaticals[i].Total_Quantity</td>
+                                    <td class="txt-oflo"><span class="text-success">@string.Format("{0:0,0} đ", Convert.ToDouble(@ProductStaticals[i].Total_Revenue.ToString()))</span></td>
+                                </tr>
+                            }
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+
+    //-- Doanh thu, Chi phí, lợi nhuận
+    var chartData = @Html.Raw(Json.Serialize(Model));
+
+    var labels = [];
+    var tongThanhTienData = [];
+
+    for (var i = 0; i < chartData.length; i++) {
+        labels.push(formatDate(chartData[i].day));
+        tongThanhTienData.push(chartData[i].tongThanhTien);
+    }
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Tổng doanh thu',
+                data: tongThanhTienData,
+                backgroundColor: 'rgba(72,209,204, 1)',
+                borderColor: 'rgba(72,209,204, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true
+                },
+                datalabels: {
+                    display: 'auto',
+                    color: '#fff',
+                    anchor: 'center',
+                    align: 'center',
+                    formatter: function (value, context) {
+                        return value.toLocaleString();
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+
+
+
+    //-- Thống kê theo danh mục sản phẩm
+    var ctxPieChart = document.getElementById('myPieChart').getContext('2d');
+
+    var data = {
+        labels: @Html.Raw(Json.Serialize(labels)),
+        datasets: [{
+            data: @Html.Raw(Json.Serialize(data)),
+            backgroundColor: @Html.Raw(Json.Serialize(backgroundColor)),
+            hoverBackgroundColor: @Html.Raw(Json.Serialize(hoverBackgroundColor))
+            }]
+    };
+
+    window.addEventListener('resize', function () {
+        var chartContainer = document.getElementById('chart-container');
+        var width = chartContainer.clientWidth;
+        var height = chartContainer.clientHeight;
+        console.log(width)
+        myChart.resize(width, height);
+    });
+
+    var myPieChart = new Chart(ctxPieChart, {
+        type: 'pie',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+
+    function formatDate(date) {
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2)
+                month = '0' + month;
+            if (day.length < 2)
+                day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+</script>

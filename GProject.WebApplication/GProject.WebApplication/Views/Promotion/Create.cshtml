@@ -1,0 +1,300 @@
+﻿@model GProject.WebApplication.Models.PromotionDTO
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.WebApplication.Helpers;
+@using GProject.Data.DomainClass;
+@{
+    ViewBag.Title = "Quản lí giảm giá";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    //-- Lấy danh sách sản phẩm
+    List<Product> products = (List<Product>)ViewData["ProductList"];
+    var lstCategory = await Commons.GetAll<Category>(String.Concat(Commons.mylocalhost, "Category/get-all-Category"));
+    IList<SelectListItem> CategoryItems = new List<SelectListItem>();
+    if (lstCategory.Count > 0)
+    {
+        CategoryItems.Add(new SelectListItem()
+                {
+                    Value = "-1",
+                    Text = "-- Danh mục sản phẩm --",
+                    Selected = "-1" == Model.CategoryApply.NullToString(),
+                });
+
+        foreach (var br in lstCategory)
+        {
+            CategoryItems.Add(new SelectListItem()
+                    {
+                        Value = br.Id.ToString(),
+                        Text = br.Name,
+                        Selected = br.Id.ToString() == Model.CategoryApply.NullToString(),
+                    });
+        }
+    }
+}
+<style>
+    label {
+        color: black;
+    }
+
+    h1 {
+        color: black;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0px;
+        z-index: 1;
+        background-color: #E5E5E5;
+    }
+
+    .sticky-table {
+        border-collapse: separate !important;
+    }
+</style>
+
+@if (@ViewData["Mess"] != null)
+{
+    <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+}
+<form id="formdata" asp-action="Create" class="form-horizontal d-block" enctype="multipart/form-data">
+    <div class="row">
+        <input asp-for="Id" style="width:0px;height:0px;visibility: hidden;" hidden="hidden" />
+        <input asp-for="PromotionId" style="width:0px;height:0px;visibility: hidden;" hidden="hidden" />
+        @Html.Hidden("ProductApply", Model.ProductApply)
+        @Html.Hidden("ImageURl", "")
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label col-sm-5">Tên chương trình:</label>
+                <div class="col-sm-9">
+                    <input asp-for="PromotionName" class="form-control" placeholder="Promotion Name" maxlength="200" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label col-sm-5">Giảm giá theo:</label>
+                <div class="col-md-9">
+                    @Html.DropDownList("DiscountPercent", new[]
+                    {
+                    new SelectListItem{Text="VNĐ", Value="0", Selected = (Model.DiscountPercent != null ? (Model.DiscountPercent == 0) : true)},
+                    new SelectListItem{Text="%", Value="1",  Selected = (Model.DiscountPercent != null ? (Model.DiscountPercent == 1) : true)}
+                    }, new { @class = "form-control iscompany" })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label col-sm-5">Mức giảm giá:</label>
+                <div class="col-sm-9">
+                    @Html.TextBox("DiscountRate", decimal.Parse(Model.DiscountRate.ToString("0.##")), new { @min="0", @type="number", @oninput="this.value = Math.abs(this.value)", @class = "required form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label col-sm-5">Ngày bắt đầu:</label>
+                <div class="col-sm-9">
+                    <input asp-for="StartDate" id="StartDate" type="datetime-local" value="<?php echo date('Y-m-d'); ?>" maxlength="200" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label col-sm-5">Ngày kết thúc:</label>
+                <div class="col-sm-9">
+                    <input asp-for="EndDate" type="datetime-local" value="<?php echo date('Y-m-d'); ?>" maxlength="200" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label col-sm-5">Loại danh mục:</label>
+                <div class="col-sm-9">
+                    @Html.DropDownList("CategoryApply", CategoryItems, new { @maxlength = "30", @class = "searchText form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label col-sm-5">Trạng thái:</label>
+                <div class="col-md-9">
+                    @Html.DropDownList("Status", new[]
+                    {
+                    new SelectListItem{Text="Chưa diễn ra", Value="0", Selected = (Model.Status != null ? (Model.Status == GProject.Data.Enums.PromotionStatus.Happenning) : true)},
+                    new SelectListItem{Text="Đang diễn ra", Value="1", Selected = (Model.Status != null ? (Model.Status == GProject.Data.Enums.PromotionStatus.Happenning) : true)},
+                    new SelectListItem{Text="Đã kết thúc", Value="2", Selected = (Model.Status != null ? (Model.Status == GProject.Data.Enums.PromotionStatus.Happend) : true)},
+                    }, new { @class = "form-control iscompany" })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label class="control-label col-sm-5">Trạng thái:</label>
+            <div class="col-sm-9">
+                <input asp-for="Image_Upload" type="file" class="form-control" />
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-3">Mô tả:</label>
+        <div class="col-sm-12">
+            <textarea class="form-control" asp-for="Description" cols="50" rows="5" style="border:double 4px orange;"></textarea>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <h3>Danh sách sản phẩm</h3>
+        </div>
+        <div class="col-md-4">
+            <input class="form-control" type="text" placeholder="Tìm kiếm theo tên sản phẩm" name="searchByProductName" id="searchByProductName" />
+        </div>
+    </div>
+   
+    <div class="productDetail">
+        <table id="ProductTable" class="col-md-12">
+        </table>
+    </div>
+
+    <button type="submit" class="btn btn-sm btn-success" id="cpCopyBtn"><i class="fa fa-check" aria-hidden="true"></i> Lưu thông tin</button>
+    <button type="button" class="btn btn-sm btn-dark btn-dimiss-modal" onclick="document.location = '/Promotion/index'">
+        <i class="fa fa-times"></i> Quay lại
+    </button>
+</form>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#StartDate").on("change", function () {
+            validateEndDate();
+        });
+        $("#EndDate").on("change", function () {
+            validateEndDate();
+        });
+
+        $('#formdata').hide();
+        var er = document.getElementById('error');
+        if (er != null) {
+            if ($('#error').text() == 'Failed')
+                swal("Không thành công", "Vui lòng xem lại thông tin đã nhập", "error");
+            else
+                swal("Thành công", "Bạn đã lưu thành công thông tin đã nhập", "success");
+        }
+
+        $('#ckbAll').change(function () {
+            if ($(this).is(':checked')) {
+                $('.ckbProdItem').prop('checked', true);
+            } else {
+                $('.ckbProdItem').prop('checked', false);
+            }
+        });
+        $('#ProductTable').load("/Promotion/ReloadTable?id=" + $(this).val() + "&price=" + $('#DiscountRate').val());
+    });
+    $("#CategoryApply").change(function () {
+        $('#ProductTable').load("/Promotion/ReloadTable?id=" + $(this).val() + "&price=" + $('#DiscountRate').val());
+    });
+    $("#searchByProductName").keyup(function () {
+        $('#ProductTable').load("/Promotion/searchByProductName?prodName=" + $(this).val() + "&id=" + $('#CategoryApply').val() + "&price=" + $('#DiscountRate').val());
+    });
+    document.querySelector('#formdata').addEventListener('submit', function (e) {
+        var form = this;
+
+        e.preventDefault();
+        if (checkValidateData()) {
+            swal("Bạn chắc chắn lưu những thay đổi này?", {
+                title: 'Bạn chắc chắn muốn lưu nhưng thay đổi này?',
+                icon: 'info',
+                buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
+            }).then(function (isConfirm) {
+                if (isConfirm) {
+                    var products = GetPromotionDetail();
+                    $('#ProductApply').val(JSON.stringify(products));
+                    form.submit();
+                } else {
+                    swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
+                }
+            });
+        }
+    });
+    
+    function compareDate(date1, date2) {
+        if (date1.getFullYear() > date2.getFullYear()) return true;
+        if (date1.getFullYear() == date2.getFullYear()) {
+            if (date1.getMonth() > date2.getMonth()) return true;
+            if (date1.getMonth() == date2.getMonth()) {
+                if (date1.getDate() >= date2.getDate()) return true;
+                else return false;
+            }
+            if (date1.getMonth() < date2.getMonth()) return false;
+        }
+        if (date1.getFullYear() < date2.getFullYear()) return false;
+    }
+
+    function checkValidateData() {
+        if ($('#PromotionName').val() == '') {
+            sweetAlert("Thông báo", "Thông tin tên chương trình giảm giá không được để trống", "error");
+            return false;
+        }
+        if (($('#DiscountRate').val() || 0) <= 0) {
+            sweetAlert("Thông báo", "Mức giảm giá không được bỏ trống", "error");
+            return false;
+        }
+        if (parseInt($('#DiscountPercent').val()) == 1) {
+            if (parseFloat($('#DiscountRate').val() || 0) <= 0 || parseFloat($('#DiscountRate').val() || 0) > 100) {
+                sweetAlert("Thông báo", "Mức giảm giá không được cao hơn 100%", "error");
+                return false;
+            }
+        }
+
+        var startDate = new Date($("#StartDate").val());
+            var endDate = new Date($("#EndDate").val());
+            if (endDate < startDate) {
+                sweetAlert("Thông báo", "Thông tin ngày kết thúc không được nhỏ hơn ngày bắt đầu", "error");
+                return false;
+            }
+        if ($('#ImageURl').val() == '') {
+            sweetAlert("Thông báo", "Thông tin hình ảnh không được để trống", "error");
+            return false;
+        }
+
+        
+        return true;
+    }
+
+    function GetPromotionDetail() {
+        var length = $('input[name=cbid]:checked').length;
+
+        // Nếu không có checkbox nào được chọn, hiển thị thông báo lỗi
+        if (length == 0) {
+            swal('Lỗi', 'Bạn chưa chọn sản phẩm', 'error');
+            return;
+        }
+
+        var products = [];
+        $('input[name=cbid]:checked').each(function () {
+            var _product = {};
+            _product.ProductId = $(this).parents("tr").find("input[type=text].prodId").val();
+            _product.InitialPrice = parseFloat($(this).parents("tr").find("input[type=text].prodPrice").val()) || 0;
+
+            let cCurrentPrice = 0;
+            //Nếu là VNĐ
+            if (parseInt($('#DiscountPercent').val()) == 0) {
+                cCurrentPrice = _product.InitialPrice - (parseFloat($('#DiscountRate').val()) || 0);
+            }//Nếu là %
+            else {
+                cCurrentPrice = _product.InitialPrice - (_product.InitialPrice * (parseFloat($('#DiscountRate').val()) || 0) / 100);
+            }
+            _product.CurrentPrice = cCurrentPrice || 0;
+            products.push(_product);
+        });
+        if (products.length == 0) {
+            swal('Lỗi', 'Bạn chưa chọn sản phẩm', 'error');
+        }
+
+        return products;
+    }
+
+    $('#Image_Upload').change(function () {
+        var _file = $(this)[0].files[0];
+        if (_file) {
+            $('#ImageURl').val(_file.name);
+        } else {
+            $('#ImageURl').val('');
+        }
+    });
+</script>

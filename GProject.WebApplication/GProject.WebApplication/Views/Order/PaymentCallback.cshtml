@@ -1,0 +1,12 @@
+﻿@{
+    if (ViewBag.Message)
+    {
+        <h3 class="text-center text-warning">Thanh toán không thành công bạn cần thực hiện lại!</h3>
+        <a href="/Product/ShowDetailMyCart">Quay lại giỏ hàng</a>
+    }
+    else
+    {
+        <h3 class="text-center text-warning">Đơn hàng đã được thanh toán thành công!</h3>
+        <a href="/Product/Index">Quay lại trang chủ</a>
+    }
+}

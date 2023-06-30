@@ -1,0 +1,376 @@
+﻿@*@model GProject.WebApplication.Models.OrderDto*@
+@model X.PagedList.IPagedList<GProject.Data.DomainClass.Order>
+@addTagHelper *, PagedList.Core.Mvc
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.Api.MyServices.Services;
+@using GProject.WebApplication.Helpers;
+@using GProject.Data.DomainClass;
+@using X.PagedList.Mvc.Core;
+@{
+    ViewBag.Title = "Quản lý đơn hàng";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    //Pager pager = new Pager();
+    //int pageNo = 0;
+
+    //if (ViewBag.Pager != null)
+    //{
+    //    pager = ViewBag.Pager;
+    //    pageNo = pager.CurrentPage;
+    //}
+    var lstOrderDetail = await Commons.GetAll<OrderDetail>(String.Concat(Commons.mylocalhost,
+    "Order/get-all-Order-detail"));
+}
+<style>
+    label {
+        color: black;
+    }
+
+    h1 {
+        color: black;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0px;
+        z-index: 1;
+        background-color: #E5E5E5;
+    }
+
+    .sticky-table {
+        border-collapse: separate !important;
+    }
+
+
+    .totalStatus:after {
+        content: attr(value);
+        font-size: 15px;
+        background: red;
+        border-radius: 50%;
+        padding: 3px 6px;
+        position: relative;
+        left: -8px;
+        top: -10px;
+        opacity: 0.9;
+        color: white;
+    }
+</style>
+
+<div class="container">
+    
+@if (@ViewData["Mess"] != null)
+{
+    <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+}
+
+<button class="btn btn-outline-secondary text-dark " id="changeformsearch" type="button" onclick="ChangeSearch()">Tìm kiếm</button>
+<form id="Searchform" name="SearchForm" method="post" class="form-horizontal" style="margin-top: 15px;" action="/Order/Index">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                    <label class="">Mã hóa đơn</label>
+                                    <div class="col-md-9 col-xs-12">
+                                        <input id="sId" name="sId" value="@ViewData["sId"]" class="form-control" />
+                                    </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="">Email</label>
+                                <div class="col-9">
+                                    <input type="email" id="sEmail" name="sEmail" value="@ViewData["sEmail"]"
+                                        class="form-control" />
+                                </div>
+                            </div> 
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                <div class="col-9">
+                                    <select name="sortOrder" id="sortOrder" class="form-select">
+                                        <option value="">-- Tất cả --</option>
+                                        <option value="@ViewData["InProgress"]">Chờ xác nhận</option>
+                                        <option value="@ViewData["XacNhan"]">Đã xác nhận</option>
+                                        <option value="@ViewData["Confirmed"]">Đang vận chuyển</option>
+                                        <option value="@ViewData["Delivery"]">Đang giao hàng</option>
+                                        <option value="@ViewData["Accomplished"]">Hoàn thành</option>
+                                        <option value="@ViewData["Canceled"]">Đã hủy</option>                   
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="">Tên khách hàng</label>
+                                <div class="col-9">
+                                    <input type="text" id="sName" name="sName" value="@ViewData["sName"]"
+                                        class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="">Hình thức thanh toán</label>
+                                <div class="col-md-9">
+                                    @{
+                                        int gender = int.Parse(Html.Encode(ViewData["sPaymentType"]));
+                                    }
+                                    @Html.DropDownList("sPaymentType",new[]
+                                    {
+                                    new SelectListItem{Text="-- Tất cả --", Value="-1", Selected= (gender== -1)},
+                                    new SelectListItem{Text="Thanh toán khi nhận hàng", Value="0", Selected= (gender==
+                                    0)},
+                                    new SelectListItem{Text="Thanh toán ngay khi đặt hàng", Value="1", Selected= (gender
+                                    == 1)}
+                                    }, new { @name = "sPaymentType", @class="searchText form-control select"})
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="">Số điện thoại</label>
+                                <div class="col-9">
+                                    <input type="text" id="sPhone" onkeyup="checkphone()" maxlength="10" name="sPhone"
+                                        value="@ViewData["sPhone"]" class="form-control" />
+                                </div>
+                            </div> 
+                            <div class="form-group">
+                                <label class="">Thay đổi thông tin đơn hàng</label>
+                                <div class="col-9">
+                                    <select name="history" id="history" class="form-select">
+                                        <option value="3">-- Tất cả --</option>
+                                        <option value="1">Đơn hàng đã sửa</option>
+                                        <option value="0">Đơn hàng chưa sửa</option>
+                                    </select>
+                                </div>
+                            </div>                        
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer text-center">
+                    <button class="btn btn-success" onclick="$('.searchText').removeAttr('disabled')" type="submit">
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <a class="btn btn-outline-info" asp-action="Index">
+                        <i class="fas fa-undo-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<hr style="color:red;" />
+<div class="row">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title"
+                style="text-align:center; height:50px; padding:10px 10px 10px 10px;">
+                Danh sách đơn đặt hàng
+            </h3>
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive" style="overflow-y: auto; max-height: 700px;">
+                <table class="table table-bordered table-hover sticky-table">
+                    <thead class="sticky-header">
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã hóa đơn</th>
+                            <th>Tên khách hàng</th>
+                            <th>Email</th>
+                            <th>Số điện thoại</th>
+                            <th>Ngày đặt hàng</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái thanh toán</th>
+                            <th>Trạng thái</th>
+                            <th>Sửa</th>
+                            <th>Lịch sử</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null)
+                        {
+                            int stt = 1;
+                            @for (int i = 0; i < Model.Count(); i++)
+                            {
+                                int statusSel = (int)Model[i].Status;
+                                <tr>
+                                    <td hidden><input class="orderId" disabled hidden="hidden" type="text"
+                                            value="@(Model[i].Id.ToString())"></td>
+                                    <td hidden><input class="customerId" disabled hidden="hidden" type="text"
+                                            value="@(Model[i].CustomerId.ToString())"></td>
+                                    <td>@(i + 1)</td>
+                                    <td>@Model[i].OrderId</td>
+                                    <td>@Model[i].ShippingFullName</td>
+                                    <td>@Model[i].ShippingEmail</td>
+                                    <td>@Model[i].ShippingPhone</td>
+                                    <td>@Model[i].CreateDate</td>
+                                    <td>@string.Format("{0:0,0} đ", Model[i].TotalMoney)</td>
+                                    <td>
+                                        @if(Model[i].PaymentDate == null)
+                                        {
+                                            <a>Chưa thanh toán</a>
+                                        }
+                                        else    
+                                        {
+                                            <a class="text-info">Đã thanh toán</a>
+                                        }
+                                    </td>
+                                    @{
+                                            switch ((int)Model[i].Status)
+                                            {
+                                                case 0:
+                                                    <td>
+                                                        <a class="text-dark">Chờ xác nhận</a>
+                                                    </td>
+                                                    break;
+                                                case 6:
+                                                    <td>
+                                                        <a class="text-white bg-warning">Đã xác nhận</a>
+                                                    </td>
+                                                    break;
+                                                case 1:
+                                                    <td>
+                                                        <a class="text-white bg-info">Đang vận chuyển</a>
+                                                    </td>
+                                                    break;
+                                                case 2:
+                                                    <td>
+                                                        <a class="text-white bg-primary">Đang giao hàng</a>
+                                                    </td>
+                                                    break;
+                                                case 3:
+                                                    <td> 
+                                                        <a class="text-white bg-success">Đã hoàn thành</a>
+                                                    </td>
+                                                    break;
+                                                default:
+                                                    <td>
+                                                        <a class="text-white bg-danger">Đã hủy</a>
+                                                    </td>
+                                                    break;
+                                            }
+                                        }
+                                    <td>
+                                            <button class="btn btn-outline-warning border-0" onclick="location.href='@Url.Action("Update", "Order",new { id = Model[i].Id})'" />
+                                            <i class="fas fa-pen-square"></i>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(Model[i].HistoryLogChange))
+                                        {
+                                            <button type="button" class="btn btn-outline-info border-0" onclick="ViewOrderDetailData('@Model[i].Id')"><i class="fa fa-eye"></i></button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-outline-default border-0"><i class="fa fa-lock"></i></button>
+                                        }
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <div style="float: right">
+                @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page }), new X.PagedList.Web.Common.PagedListRenderOptions()
+                {
+                ActiveLiElementClass = "active",
+                PageClasses = new[]{ "page-link"},
+                LiElementClasses=new[] { "page-item" },
+                LinkToNextPageFormat = "Next",
+                LinkToPreviousPageFormat = "Prev",
+                })
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="ViewDetail" role="dialog">
+    <div class="modal-dialog modal-md" style="text-align:left; background-color:white; max-width:1200px">
+        <div style="width:1200px;">
+            <div class="modal-content justify-content-center" style="border-width:1px;">
+                <div class="modal-header" style="width:1000px;">
+                    <h4 class="modal-title text-center">Lịch sử chỉnh sửa</h4>
+                </div>
+                <div class="modal-body">
+                    <span id="pName"></span>
+                </div>
+                <div class="modal-footer" style="margin-top: -20px">
+                    <button type="button" class="btn btn-sm btn-default btn-dimiss-modal" onclick="btnClose()"
+                        <i class="fa fa-times"></i> Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        if ($("#sId").val() != '' ||
+            $("#sName").val() != '' ||
+            $("#sEmail").val() != '' ||
+            $("#sPhone").val() != '') 
+        {
+            $('#Searchform').show();
+        }
+        else{
+            $('#Searchform').hide();
+        }
+
+        
+        var er = document.getElementById('error')
+        if (er != null) {
+            if ($('#error').text() == 'Failed')
+                swal("Không thành công", "Lưu không thành công những thay đổi vừa rồi", "error");
+            else
+                swal("Thành công", "Bạn đã lưu thành công những thay đổi vừa rồi", "success");
+        }
+    });
+
+
+    function ChangeSearch() {
+        if ($("#changeformsearch").text() == "Tìm kiếm") {
+            $('#Searchform').show();
+            //$("#ExpirationDate").val(new Date().toJSON().slice(0,19));
+            $("#changeformsearch").text("Hủy tìm kiếm");
+        } else if ($("#changeformsearch").text() == "Hủy tìm kiếm") {
+            $('#Searchform').hide();
+            $("#changeformsearch").text("Tìm kiếm");
+        }
+    }
+
+    function ViewOrderDetailData(ID) {
+        $.getJSON("/Order/GetLog?id=" + ID)
+            .done(function (data) {
+                data = data.replace(new RegExp('Thời gian', 'g'), '<b>Thời gian</b>');
+                data = data.replace(new RegExp('Người thay đổi', 'g'), '<b>Người thay đổi</b>');
+                data = data.replace(new RegExp('\n', 'g'), '<br/>');
+                data = data.replace(new RegExp('<------------------------------------------>', 'g'), '<br/><br/><br/>');
+
+                // update the modal content with the modified data
+                $("#pName").html(data);
+                $('#ViewDetail').modal('show');
+            })
+            .fail(function (jqxhr, textStatus, error) {
+                var err = textStatus + ", " + error;
+                console.log("Request Failed: " + err);
+            });
+    }
+    function btnClose() {
+        $('#ViewDetail').modal('hide');
+    }
+
+    function checkphone(){
+        let regex = /^[0-9]+$/;
+            if (!regex.test($("#sPhone").val()))
+                $("#sPhone").val($("#sPhone").val().replace(/[^0-9.]/g, ""));
+    }
+
+</script>

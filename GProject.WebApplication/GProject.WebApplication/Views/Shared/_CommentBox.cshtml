@@ -1,0 +1,133 @@
+﻿@model Tuple<GProject.Data.DomainClass.Product, List<GProject.Data.DomainClass.ProductVariation>, GProject.Data.DomainClass.Brand, EvaluateCommentDTO, decimal, int, GProject.Data.DomainClass.Customer>
+<link href="/AdminContent/css/style.min.css" rel="stylesheet">
+<link href="/AdminContent/css/InputCss.css" rel="stylesheet">
+<style>
+
+    .commentBox {
+        background-color: #efefef;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .starFade {
+        background-image: url("/images/saotrang.jpg");
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .starFadeN {
+        background-image: url("/images/saotrang.jpg");
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+    }
+
+    .starGlow {
+        background-image: url("/images/sao_vang.jpg");
+        min-width: 30px;
+        min-height: 30px;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .starGlowN {
+        background-image: url("/images/sao_vang.jpg");
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+    }
+</style>
+<div class="dl-horizontal">
+    <dt>
+        Bình luận
+    </dt>
+    <dd>
+        <div class="commentBox">
+            @using (Html.BeginForm("Save", "Evaluate", FormMethod.Post, new { onsubmit = "return SubmitComment()" }))
+            {
+                @Html.AntiForgeryToken();
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <strong style="font-weight:normal;">Hãy giúp chúng tôi cải thiện sản phẩm bằng cách đánh giá và chia sẻ ý kiến của bạn.</strong>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-1 d-flex justify-content-between">
+                            @{
+                                if (string.IsNullOrEmpty(Model.Item7.Image))
+                                {
+                                    <img src="~/images/avatar.jpg" style="border-radius:50%; width:35px; border:2px solid black;">
+                                }
+                                else
+                                {
+                                    <img src="~/images/@Model.Item7.Image" style="border-radius:50%; width:35px; border:2px solid black;">
+                                }
+                            }
+                        </div>
+                        <div class="col-md-7">
+                            <div onmouseout="CRateSelected()">
+                                <span class="starFade" id="Rate1" onclick="CRate(1)" onmouseover="CRateOver(1)"></span>
+                                <span class="starFade" id="Rate2" onclick="CRate(2)" onmouseover="CRateOver(2)"></span>
+                                <span class="starFade" id="Rate3" onclick="CRate(3)" onmouseover="CRateOver(3)"></span>
+                                <span class="starFade" id="Rate4" onclick="CRate(4)" onmouseover="CRateOver(4)"></span>
+                                <span class="starFade" id="Rate5" onclick="CRate(5)" onmouseover="CRateOver(5)"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <input type="text" id="Comment" name="Comment" required class="form-control" placeholder="Thêm nhận xét" value="@Model.Item4.Comment"></input>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <input type="hidden" id="Id" name="Id" value="@Model.Item4.Id"/>
+                                <input type="hidden" id="ProductId" name="ProductId" value="@Model.Item4.ProductId"/>
+                                <input type="hidden" id="Rating" name="Rating" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </dd>
+</div>
+<script>
+    function SubmitComment(){
+        if($('#Rating').val() == '0'){
+            alert("Please rate this service provider.");
+            return false;
+        }else
+        {
+            return true;
+        }
+    }
+
+    function CRate(r){
+        $('#Rating').val(r);
+        for(var i = 1; i <= r; i++){
+            $("#Rate" + i).attr('class', 'starGlow');
+        }
+
+        for (var i = r + 1; i <= 5; i++) {
+            $("#Rate" + i).attr('class', 'starFade');
+        }
+    }
+
+    function CRateOver(r){
+        for(var i = 1; i <= r; i++){
+            $("#Rate" + i).attr('class', 'starGlow');
+        }
+    }
+    function CRateOut(r){
+        for(var i = 1; i <= r; i++){
+            $("#Rate" + i).attr('class', 'starFade');
+        }
+    }
+    function CRateSelected() {
+        var setRating = $('#Rating').val();
+        for (var i = 1; i <= setRating; i++) {
+            $("#Rate" + i).attr('class', 'starGlow');
+        }
+    }
+</script>

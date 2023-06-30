@@ -1,0 +1,470 @@
+﻿@model GProject.WebApplication.Models.ProductMGRDTO
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using GProject.WebApplication.Models
+@using GProject.Api.MyServices.Services;
+@using GProject.Data.DomainClass;
+@using GProject.WebApplication.Helpers;
+@{
+    ViewBag.Title = "Thay đổi thông tin sản phẩm";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+@{
+    var lstBrand = await Commons.GetAll<Brand>(String.Concat(Commons.mylocalhost, "Brand/get-all-Brand"));
+    var lstCategory = await Commons.GetAll<Category>(String.Concat(Commons.mylocalhost, "Category/get-all-Category"));
+    IList<SelectListItem> StoreItems = new List<SelectListItem>();
+    if (lstBrand.Count > 0)
+    {
+        StoreItems.Add(new SelectListItem()
+                {
+                    Value = "-1",
+                    Text = "--Nhãn hiệu--",
+                    Selected = "-1" == Model.BrandId.ToString(),
+                });
+
+        foreach (var br in lstBrand)
+        {
+            StoreItems.Add(new SelectListItem()
+                    {
+                        Value = br.Id.ToString(),
+                        Text = br.Name,
+                        Selected = br.Id == Model.BrandId,
+                    });
+        }
+    }
+
+    IList<SelectListItem> CategoryItems = new List<SelectListItem>();
+    if (lstCategory.Count > 0)
+    {
+        CategoryItems.Add(new SelectListItem()
+                {
+                    Value = "-1",
+                    Text = "-- Danh mục sản phẩm --",
+                    Selected = "-1" == Model.CategoryId.ToString(),
+                });
+
+        foreach (var br in lstCategory)
+        {
+            CategoryItems.Add(new SelectListItem()
+                    {
+                        Value = br.Id.ToString(),
+                        Text = br.Name,
+                        Selected = br.Id == Model.CategoryId,
+                    });
+        }
+    }
+}
+<style>
+    label {
+        color: black;
+    }
+
+    h1 {
+        color: black;
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0px;
+        z-index: 1;
+        background-color: #E5E5E5;
+    }
+
+    .sticky-table {
+        border-collapse: separate !important;
+    }
+
+    .campic i {
+        font-size: 35px;
+        color: #000;
+        margin: 5px 0;
+        cursor: pointer;
+    }
+
+    .campic input[type="file"] {
+        display: block;
+    }
+
+    .pip-file {
+        position: relative;
+    }
+
+    .picThumb {
+        max-height: 200px;
+        border: 1px solid;
+        padding: 1px;
+        cursor: pointer;
+    }
+
+    .remove-img {
+        position: absolute;
+        bottom: 25px;
+        right: -5px;
+    }
+
+    .campic .remove-img i {
+        font-size: 20px;
+        color: #fff;
+        cursor: pointer;
+        background: red;
+        margin: 0;
+        padding: 1px 4px 4px;
+        border-radius: 20px;
+    }
+</style>
+
+<div class="container">
+
+    @if (@ViewData["Mess"] != null)
+    {
+        <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+    }
+
+    <form id="formdata" asp-action="Update" class="form-horizontal d-block" enctype="multipart/form-data">
+        <input asp-for="Id" style="width:0px;height:0px;visibility: hidden;" hidden="hidden" />
+        <input asp-for="ViewCount" style="width:0px;height:0px;visibility: hidden;" hidden="hidden" />
+        <input asp-for="LikeCount" style="width:0px;height:0px;visibility: hidden;" hidden="hidden" />
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label col-sm-5">Tên sản phầm:</label>
+                    <div class="col-sm-9">
+                        <input asp-for="Name" class="form-control" placeholder="Product name" maxlength="200" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label col-sm-5">Tên nhãn hiệu:</label>
+                    <div class="col-sm-9">
+                        @Html.DropDownList("BrandId", StoreItems, new { @maxlength = "30", @class = "searchText form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label col-sm-3">Giá nhập:</label>
+                    <div class="col-sm-9">
+                        @Html.TextBox("ImportPrice", decimal.Parse(Model.ImportPrice.ToString("0.##")), new { @maxlength = "10", @class = "required form-control"})
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label col-sm-3">Giá bán:</label>
+                    <div class="col-sm-9">
+                        @Html.TextBox("Price", decimal.Parse(Model.Price.ToString("0.##")), new { @maxlength = "10", @class = "required form-control"})
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label col-sm-5">Loại danh mục:</label>
+                    <div class="col-sm-6">
+                        @Html.DropDownList("CategoryId", CategoryItems, new { @maxlength = "30", @class = "searchText form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label col-sm-3">Loại :</label>
+                    <div class="col-md-6">
+                        @Html.DropDownList("ProductType", new[]
+                        {
+                        new SelectListItem{Text="Sản phẩm thông thường", Value="0", Selected = (Model.ProductType != null ? (Model.ProductType == "0") : true)},
+                        new SelectListItem{Text="Sản phẩm mới", Value="1",  Selected = (Model.ProductType != null ? (Model.ProductType == "1") : true)},
+                        new SelectListItem{Text="Sản phẩm nổi bật", Value="2", Selected = (Model.ProductType != null ? (Model.ProductType == "2") : true)},
+                        new SelectListItem{Text="Sản phẩm được yêu thích", Value="3",  Selected = (Model.ProductType != null ? (Model.ProductType == "3") : true)},
+                        new SelectListItem{Text="Sản phẩm khuyến mại", Value="4", Selected = (Model.ProductType != null ? (Model.ProductType == "4") : true)}
+                        }, new { @class = "form-control iscompany" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label col-sm-3">Trạng thái:</label>
+                    <div class="col-md-6">
+                        @Html.DropDownList("Status", new[]
+                        {
+                        new SelectListItem{Text="Đang bán", Value="0", Selected = (Model.Status != null ? (Model.Status == 0) : true)},
+                        new SelectListItem{Text="Ngừng bán", Value="1",  Selected = (Model.Status != null ? (Model.Status == 1) : true)}
+                        }, new { @class = "form-control iscompany" })
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-6">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3">Mô tả:</label>
+            <div class="col-sm-12">
+                <textarea class="form-control" asp-for="Description" cols="50" rows="5" style="border:double 4px orange;"></textarea>
+            </div>
+        </div>
+
+        <h3>Thông tin sản phẩm chi tiết</h3>
+        <div class="col-md-12">
+            <div class="form-group">
+                <div class="row">
+                    <div class="form-check">
+                        <input type="checkbox" id="ckbAll" class="form-check-input" />
+                        <h5 class="form-check-label">Chọn tất cả</h5><span style="color: red">Lưu ý(*): Chỉ lưu thông tin những sản phẩm có đánh dấu</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="row" style="height: 500px; overflow-y: scroll; border: solid 1px;">
+                    @if (Model != null && Model.ProductVariationViewModel.Count >= 0 && Model.ProductVariationViewModel != null && Model.SizeList.Count >= 0 && Model.SizeList != null)
+                    {
+                        @for (int i = 0; i < Model.ProductVariationViewModel.Count; i++)
+                        {
+                            @Html.HiddenFor(m => m.ProductVariationViewModel[i].Id)
+                            @Html.HiddenFor(m => m.ProductVariationViewModel[i].VariationId)
+                            @Html.HiddenFor(m => m.ProductVariationViewModel[i].ProductId)
+                            <div class="form-check col-md-12 m-2">
+                                <input type="checkbox" asp-for="ProductVariationViewModel[i].IsChecked" class="form-check-input-variation-item">
+                                <label class="form-check-label">
+                                    (@Model.ProductVariationViewModel[i].HEXCode) - @Model.ProductVariationViewModel[i].Name <img style="width:120px;height:30px; border;1px solid; margin-left:10px;border:1px black solid;" src="~/images/@Model.ProductVariationViewModel[i].Image" />
+                                </label>
+                            </div>
+                            <div class="campic col-md-3">
+                                @{
+                                    string strImage = Model.ProductVariationViewModel[i].ImageProduct.NullToString();
+                                }
+                                @if (!string.IsNullOrEmpty(strImage))
+                                {
+                                    <span class="pip-file">
+                                        <img id="@("upimg" + i)" src="@("/images/" + strImage)" onclick="uploadImage(@i)" style="width: 180px;height: 150px;" class="picThumb">
+                                        <span class="remove-img"><img src='http://www.elahmad.com/images/icon_close_16px.gif'></span>
+                                    </span>
+
+                                }
+                                else
+                                {
+                                    <span class="pip-file">
+                                        <img id="@("upimg" + i)" src="https://cdn3.iconfinder.com/data/icons/web-document-icons/512/Upload_Document-512.png" onclick="uploadImage(@i)" style="width: 180px;height: 150px;" class="picThumb">
+                                        @*<span class="remove-img"><img src='http://www.elahmad.com/images/icon_close_16px.gif'></span>*@
+                                    </span>
+                                }
+                                <input type="file" asp-for="ProductVariationViewModel[i].Image_Upload" class="@("picImg" + i)" accept=".jpg, .png" style="display: none;" />
+                            </div>
+                            <div class="col-md-9 row">
+                                @if (Model.ProductVariationViewModel[i].SizeAndStock != null && Model.ProductVariationViewModel[i].SizeAndStock.Count() > 0)
+                                {
+                                    Model.ProductVariationViewModel[i].SizeAndStock = Model.ProductVariationViewModel[i].SizeAndStock.OrderBy(c => c.Id).ToList();
+                                    @for (int j = 0; j < Model.ProductVariationViewModel[i].SizeAndStock.Count(); j++)
+                                    {
+                                        <div class="form-group col-md-3">
+                                            <label class="col-sm-4" style="text-align: left;">
+                                                (@Model.ProductVariationViewModel[i].SizeAndStock[j].Code)
+                                            </label>
+                                            <div class="col-sm-12">
+                                                <input type="text" asp-for="ProductVariationViewModel[i].SizeAndStock[j].QuantityInstock" class="form-control quantityInstock" placeholder="0">
+                                                @Html.HiddenFor(m => m.ProductVariationViewModel[i].SizeAndStock[j].Id)
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    Model.ProductVariationViewModel[i].SizeAndStock = Model.SizeList.OrderBy(c => c.Id).ToList();
+                                    @for (int j = 0; j < Model.ProductVariationViewModel[i].SizeAndStock.Count; j++)
+                                    {
+                                        <div class="form-group col-md-3">
+                                            <label class="col-sm-4" style="text-align: left;">
+                                                (@Model.ProductVariationViewModel[i].SizeAndStock[j].Code)
+                                            </label>
+                                            <div class="col-sm-12">
+                                                <input type="text" asp-for="ProductVariationViewModel[i].SizeAndStock[j].QuantityInstock" class="form-control quantityInstock" placeholder="0">
+                                                @Html.HiddenFor(m => m.ProductVariationViewModel[i].SizeAndStock[j].Id)
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-sm btn-success" id="cpCopyBtn"><i class="fa fa-check" aria-hidden="true"></i> Lưu thông tin</button>
+        <button type="button" class="btn btn-sm btn-dark btn-dimiss-modal" onclick="document.location = '/ProductMGR/index'">
+            <i class="fa fa-times"></i> Quay lại
+        </button>
+    </form>
+</div>
+
+<script type="text/javascript">
+    function uploadImage(id) {
+        let picImgdata = ".picImg" + id;
+        let upimg = "#upimg" + id;
+        $(picImgdata).click();
+        let flag = 0;
+        if (window.File && window.FileList && window.FileReader) {
+            $(picImgdata).on("change", function (e) {
+                flag++;
+                if (flag <= 1) {
+                    var files = e.target.files,
+                        filesLength = files.length;
+                    for (var i = 0; i < filesLength; i++) {
+                        var f = files[0];
+                        var fileReader = new FileReader();
+                        fileReader.onload = (function (e) {
+                            var file = e.target;
+                            $("<span class=\"pip-file\">" +
+                                "<img style=\"width: 180px;height: 150px;\" class=\"picThumb\" src=\"" + e.target.result + "\" title=\"" + file.name + "\"/>" +
+                                "<span class=\"remove-img\"><img src ='http://www.elahmad.com/images/icon_close_16px.gif'></span>" +
+                                "</span>").insertAfter(picImgdata);
+                            $(".remove-img").click(function () {
+                                $(this).parent(".pip-file").remove();
+                                $(picImgdata).val('');
+                            });
+                            $(upimg).hide();
+                            $('.remove-img').click(function () {
+                                $(upimg).show();
+                            });
+                        });
+                        fileReader.readAsDataURL(f);
+                    }
+                }
+
+            });
+        } else {
+            alert("Your browser doesn't support to File API")
+        }
+    }
+
+    $(document).ready(function () {
+        var er = document.getElementById('error')
+        if (er != null) {
+            if ($('#error').text() == 'Failed')
+                swal("Không thành công", "Vui lòng xem lại thông tin đã nhập", "error");
+            else
+                swal("Thành công", "Bạn đã lưu thành công thông tin đã nhập", "success");
+        }
+
+        $('#ImportPrice, #Price, .quantityInstock').keyup(function () {
+            let regex = /^[0-9]+$/;
+            if (!regex.test($(this).val()))
+                $(this).val($(this).val().replace(/[^0-9.]/g, ""));
+        });
+
+        $('#ckbAll').change(function () {
+            if ($(this).is(':checked')) {
+                $('.form-check-input-variation-item').prop('checked', true);
+            } else {
+                $('.form-check-input-variation-item').prop('checked', false);
+            }
+        });
+
+        $('#ckbAllProductType').change(function () {
+            if ($(this).is(':checked')) {
+                $('.form-check-input-productType').prop('checked', true);
+            } else {
+                $('.form-check-input-productType').prop('checked', false);
+            }
+        });
+        $(".remove-img").click(function () {
+            $(this).parents(".pip-file").find(".picThumb").attr('src', 'https://cdn3.iconfinder.com/data/icons/web-document-icons/512/Upload_Document-512.png');
+            $(this).parents(".pip-file").find(".file").val('');
+            $(this).remove();
+        });
+    });
+
+    document.querySelector('#formdata').addEventListener('submit', function (e) {
+        var form = this;
+
+        e.preventDefault();
+        var name = $('#Name').val();
+        var id = $('#Id').val();
+
+        if ($('#Name').val() == '') {
+            sweetAlert("Thông báo", "Thông tin tên sản phẩm không được để trống", "error");
+            return false;
+        }
+        else {
+            $.ajax({
+                url: "/ProductMGR/CheckName?Name=" + name + "&Id=" + id,
+                type: "GET",
+                success: function (result) {
+                    if (result.success) {
+                        if (checkValidateData()) {
+                            swal("Bạn chắc chắn lưu những thay đổi này?", {
+                                title: 'Bạn chắc chắn muốn lưu nhưng thay đổi này?',
+                                icon: 'info',
+                                buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
+                            }).then(function (isConfirm) {
+                                if (isConfirm) {
+                                    form.submit();
+                                } else {
+                                    swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
+                                }
+                            });
+                        }
+                    } else {
+                        swal("Xin lỗi", "Tên đã được sử dụng.", "error");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Lỗi, hiển thị thông báo lỗi
+                    alert(error);
+                }
+            });
+        }
+    });
+
+    function checkValidateData() {
+        if (parseFloat($('#BrandId').val()) == -1) {
+            sweetAlert("Thông báo", "Thông tin nhãn hiệu sản phẩm không được để trống", "error");
+            return false;
+        }
+        if ($('#ImportPrice').val() == '') {
+            sweetAlert("", "Thông tin giá nhập không được để trống", "error");
+            return false;
+        }
+        if (isNaN($('#ImportPrice').val())) {
+            sweetAlert("", "Thông tin giá nhập chỉ bao gồm kí tự số", "error");
+            return false;
+        }
+        if (parseFloat($('#ImportPrice').val() || 0) < 0 || parseFloat($('#ImportPrice').val() || 0) === 0) {
+            sweetAlert("", "Thông tin giá nhập phải có giá trị lớn hơn 0", "error");
+            return false;
+        }
+        if ($('#Price').val() == '') {
+            sweetAlert("", "Thông tin giá bán không được để trống", "error");
+            return false;
+        }
+        if (isNaN($('#Price').val())) {
+            sweetAlert("", "Thông tin giá bán chỉ bao gồm kí tự số", "error");
+            return false;
+        }
+        if (parseFloat($('#Price').val() || 0) < 0 || parseFloat($('#Price').val() || 0) === 0) {
+            sweetAlert("", "Thông tin giá bán phải có giá trị lớn hơn 0", "error");
+            return false;
+        }
+        if (parseFloat($('#Price').val()) < parseFloat($('#ImportPrice').val())) {
+            sweetAlert("", "Thông tin giá bán phải có giá trị lớn hơn giá nhập", "error");
+            return false;
+        }
+        if (parseFloat($('#CategoryId').val()) == -1) {
+            sweetAlert("Thông báo", "Vui lòng chọn loại danh mục sản phẩm", "error");
+            return false;
+        }
+        return true;
+    }
+
+    $('#changeform').on('click', function () {
+        $('#formDataModal').modal('show');
+    })
+
+    function closeModalDialog() {
+        $('#formDataModal').modal('hide');
+    }
+</script>
