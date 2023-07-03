@@ -763,7 +763,6 @@ namespace GProject.WebApplication.Controllers
                 ViewData["totalXCan"] = lstOrder.Where(x => x.Status == OrderStatus.Canceled).ToList().Count();
                 ViewData["totalXacNhan"] = lstOrder.Where(x => x.Status == OrderStatus.DaXacNhan).ToList().Count();
 
-                ViewData["GetAll"] = sortOrder == "GetAll" ? "NotSort" : "GetAll";
                 ViewData["InProgress"] = sortOrder == "InProgress" ? "NotSort" : "InProgress";
                 ViewData["Confirmed"] = sortOrder == "Confirmed" ? "NotSort" : "Confirmed";
                 ViewData["Delivery"] = sortOrder == "Delivery" ? "NotSort" : "Delivery";
@@ -773,7 +772,7 @@ namespace GProject.WebApplication.Controllers
                 ViewData["XacNhan"] = sortOrder == "DaXacNhan" ? "NotSort" : "DaXacNhan";
 
                 if (sortOrder == null && orderId == null && phone == null)
-                    lstOrder = lstOrder.Where(x => x.Status == OrderStatus.InProgress).ToList();
+                    lstOrder = lstOrder.ToList();
 
                 switch (sortOrder)
                 {
@@ -799,9 +798,6 @@ namespace GProject.WebApplication.Controllers
                         lstOrder = lstOrder.Where(x => x.Status == OrderStatus.DaXacNhan).ToList();
                         break;
                     case "NotSort":
-                        lstOrder = lstOrder.ToList();
-                        break;
-                    case "GetAll":
                         lstOrder = lstOrder.ToList();
                         break;
                     default:
