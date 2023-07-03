@@ -21,7 +21,7 @@ namespace GProject.WebApplication.Controllers
         }
 
         [HttpPost]
-        public async Task<bool> Save([FromBody]DeliveryAddressDto obj)
+        public async Task<bool> Save([FromBody] DeliveryAddressDto obj)
         {
             var customer = HttpContext.Session.GetObjectFromJson<Customer>("userLogin");
             var lstObjs = await Commons.GetAll<DeliveryAddress>(String.Concat(Commons.mylocalhost, "DeliveryAddress/get-all"));
@@ -32,20 +32,21 @@ namespace GProject.WebApplication.Controllers
                 x.WardName == obj.WardName &&
                 x.Name == obj.Name &&
                 x.PhoneNumber == obj.PhoneNumber &&
-                x.Address == obj.Address && 
-                x.CustomerId == customer.Id              
+                x.Address == obj.Address &&
+                x.CustomerId == customer.Id
                 );
 
-            if ((checkExistence != null && checkExistence.Id != obj.Id) ) return false;
+            if ((checkExistence != null && checkExistence.Id != obj.Id)) return false;
 
             string url = Commons.mylocalhost;
 
             //-- Parse lại dữ liệu từ ViewModel
-            var prd = new DeliveryAddress() {
+            var prd = new DeliveryAddress()
+            {
                 Id = obj.Id,
                 ProvinceID = obj.ProvinceID,
-                ProvinceName = obj.ProvinceName, 
-                DistrictID = obj.DistrictID, 
+                ProvinceName = obj.ProvinceName,
+                DistrictID = obj.DistrictID,
                 DistrictName = obj.DistrictName,
                 WardCode = obj.WardCode,
                 WardName = obj.WardName,

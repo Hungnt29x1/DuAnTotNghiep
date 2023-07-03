@@ -1,4 +1,4 @@
-﻿@using GProject.Data.Enums;
+﻿﻿@using GProject.Data.Enums;
 @model GProject.WebApplication.Models.OrderDTO
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
@@ -38,50 +38,50 @@
 <div class="super_container" style="margin-top: 200px;">
     <div class="col product_section clearfix">
         @* <div class="row">
-            <div class="col-md-3"></div>
-            <div class="col-md-9">
-                <a class="btn btn-outline-primary " asp-action="ViewOrderCustomer"
-            asp-route-sortOrder="@ViewData["InProgress"]" >
-            Chờ xác nhận
-            <span style="color: red;">(@ViewData["totalInPro"])</span>
+        <div class="col-md-3"></div>
+        <div class="col-md-9">
+        <a class="btn btn-outline-primary " asp-action="ViewOrderCustomer"
+        asp-route-sortOrder="@ViewData["InProgress"]" >
+        Chờ xác nhận
+        <span style="color: red;">(@ViewData["totalInPro"])</span>
         </a>
         <a class="btn btn-outline-secondary "  asp-action="ViewOrderCustomer"
-            asp-route-sortOrder="@ViewData["XacNhan"]">
-            Đã xác nhận
-            <span style="color: red;">(@ViewData["totalXacNhan"])</span>
+        asp-route-sortOrder="@ViewData["XacNhan"]">
+        Đã xác nhận
+        <span style="color: red;">(@ViewData["totalXacNhan"])</span>
         </a>
         <a class="btn btn-outline-secondary "  asp-action="ViewOrderCustomer"
-            asp-route-sortOrder="@ViewData["Confirmed"]" >
-            Đang vận chuyển
-            <span style="color: red;">(@ViewData["totalConfi"])</span>
+        asp-route-sortOrder="@ViewData["Confirmed"]" >
+        Đang vận chuyển
+        <span style="color: red;">(@ViewData["totalConfi"])</span>
         </a>
         <a class="btn btn-outline-warning"  asp-action="ViewOrderCustomer"
-            asp-route-sortOrder="@ViewData["Delivery"]">
-            Đang giao hàng
-            <span style="color: red;">(@ViewData["totalDelivery"])</span>
+        asp-route-sortOrder="@ViewData["Delivery"]">
+        Đang giao hàng
+        <span style="color: red;">(@ViewData["totalDelivery"])</span>
         </a>
         <a class="btn btn-outline-success"  asp-action="ViewOrderCustomer"
-            asp-route-sortOrder="@ViewData["Accomplished"]" >
-            Hoàn thành
-            <span style="color: red;">(@ViewData["totalAcc"])</span>
+        asp-route-sortOrder="@ViewData["Accomplished"]" >
+        Hoàn thành
+        <span style="color: red;">(@ViewData["totalAcc"])</span>
         </a>
         <a class="btn btn-outline-danger"  asp-action="ViewOrderCustomer"
-            asp-route-sortOrder="@ViewData["Canceled"]">
-            Đã hủy
-            <span style="color: red;">(@ViewData["totalXCan"])</span>
+        asp-route-sortOrder="@ViewData["Canceled"]">
+        Đã hủy
+        <span style="color: red;">(@ViewData["totalXCan"])</span>
         </a>
         <a class="btn btn-outline-info"  asp-action="ViewOrderCustomer"><i class="fas fa-undo-alt"></i></a>
-            </div>
+        </div>
         </div> *@
 
-    <div class="container">
-        <form  asp-action="ViewOrderCustomer">
-            <div class="col-md-12">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-2"></div>
-                                <div class="form-group col-3" >
+        <div class="container">
+            <form asp-action="ViewOrderCustomer">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-2"></div>
+                                <div class="form-group col-3">
                                     <label class="col-12 control-label">Mã hóa đơn</label>
                                     <div class="col-12">
                                         <input type="text" id="orderId" name="orderId" value="@ViewData["orderId"]" class="form-control" />
@@ -97,38 +97,38 @@
                                     <label class="col-12 control-label">Trạng thái</label>
                                     <div class="col-12">
                                         <select name="sortOrder" id="sortOrder" class="form-select">
-                                            <option value=""></option>
+                                            <option value="@ViewData["GetAll"]">Tất cả</option>
                                             <option value="@ViewData["InProgress"]">Chờ xác nhận</option>
                                             <option value="@ViewData["XacNhan"]">Đã xác nhận</option>
                                             <option value="@ViewData["Confirmed"]">Đang vận chuyển</option>
                                             <option value="@ViewData["Delivery"]">Đang giao hàng</option>
                                             <option value="@ViewData["Accomplished"]">Hoàn thành</option>
-                                            <option value="@ViewData["Canceled"]">Đã hủy</option>                   
+                                            <option value="@ViewData["Canceled"]">Đã hủy</option>
                                         </select>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-2">
                                     <label class="col-12 control-label"></label>
                                     <div class="row">
                                         <div class="col-4">
-                                            <button class="btn btn-outline-success col-12"  type="submit"><i class="fa fa-search"></i></button>
+                                            <button class="btn btn-outline-success col-12" type="submit"><i class="fa fa-search"></i></button>
                                         </div>
                                         <div class="col-4" style="margin-left: -10px;">
-                                            <a class="btn btn-outline-info col-12"  asp-action="ViewOrderCustomer"><i class="fas fa-undo-alt"></i></a>
+                                            <a class="btn btn-outline-info col-12" asp-action="ViewOrderCustomer"><i class="fas fa-undo-alt"></i></a>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
 
         <h3 class="text-center" style="margin-top:25px; margin-bottom:25px">Trạng thái đơn hàng</h3>
-        @if (Model.OrderList.Count() == 0 )
+        @if (Model.OrderList.Count() == 0)
         {
             <h3 class="text-center text-warning">Không có thông tin trạng thái hóa đơn!</h3>
         }
@@ -158,36 +158,36 @@
                                                 if (item.Status == OrderStatus.InProgress)
                                                 {
                                                     <div class="progress-bar" role="progressbar"
-                                             style="width: 20%; border-radius: 16px; background-color: #a8729a;"
-                                             aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                                                         style="width: 20%; border-radius: 16px; background-color: #a8729a;"
+                                                         aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
                                                     </div>
                                                 }
                                                 if (item.Status == OrderStatus.DaXacNhan)
                                                 {
                                                     <div class="progress-bar" role="progressbar"
-                                             style="width: 40%; border-radius: 16px; background-color: #a8729a;"
-                                             aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                                                         style="width: 40%; border-radius: 16px; background-color: #a8729a;"
+                                                         aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
                                                     </div>
                                                 }
                                                 else if (item.Status == OrderStatus.Confirmed)
                                                 {
                                                     <div class="progress-bar" role="progressbar"
-                                             style="width: 60%; border-radius: 16px; background-color: #a8729a;"
-                                             aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                                                         style="width: 60%; border-radius: 16px; background-color: #a8729a;"
+                                                         aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
                                                     </div>
                                                 }
                                                 else if (item.Status == OrderStatus.Delivery)
                                                 {
                                                     <div class="progress-bar" role="progressbar"
-                                             style="width: 80%; border-radius: 16px; background-color: #a8729a;"
-                                             aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                                                         style="width: 80%; border-radius: 16px; background-color: #a8729a;"
+                                                         aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
                                                     </div>
                                                 }
                                                 else if (item.Status == OrderStatus.Accomplished)
                                                 {
                                                     <div class="progress-bar" role="progressbar"
-                                             style="width: 100%; border-radius: 16px; background-color: #a8729a;"
-                                             aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                                                         style="width: 100%; border-radius: 16px; background-color: #a8729a;"
+                                                         aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
                                                     </div>
                                                 }
                                             }
@@ -208,17 +208,17 @@
                                     <div class="row">
                                         <div class="col-md-2">
                                             <img src="~/images/@orderDetails.ProductVariation.Image"
-                                     class="img-fluid" alt="">
+                                                 class="img-fluid" alt="">
                                         </div>
                                         <div class="col-md-8">
                                             <p style="color: #444343; font-size: 18px;">
-                                                <a href="/productdetail/@orderDetails.Product.Id">@orderDetails.Product.Name</a> 
+                                                <a href="/productdetail/@orderDetails.Product.Id">@orderDetails.Product.Name</a>
                                             </p>
                                             <p style="color: gray;">
                                                 Mức giá: @orderDetails.OrderDetail.Price.ToString("#,##0.##")
                                             </p>
                                             <p style="color: gray;">
-                                                Loại hàng: @orderDetails.Color.Name, @orderDetails.Size.Code
+                                                Loại hàng: @orderDetails.Color.Name, @orderDetails.Size.Name
                                             </p>
                                             <p style="color: gray;">
                                                 Số lượng: @orderDetails.OrderDetail.Quantity
@@ -268,7 +268,7 @@
                                                 <label>Phí ship:</label>
                                             </div>
                                             <div class="col-6">
-                                                <label> @item.ShippingFee.ToString("#,##0.##") đ</label>
+                                                <label> @item.ShippingFee?.ToString("#,##0.##") đ</label>
                                             </div>
                                         </div>
                                         <div class="row">
@@ -335,7 +335,7 @@
         }
     </div>
 </div>
-    @* <div class="container">
+@* <div class="container">
         @if (pager.TotalPages > 0)
         {
             <ul class="pagination justify-content-end">
@@ -369,11 +369,11 @@
 
 <script asp-append-version="true">
     $(document).ready(function () {
-        @* $(".CanceledOrder").click(function () {
-            
-        }); *@
+    @* $(".CanceledOrder").click(function () {
 
-        var er = document.getElementById('error')
+            }); *@
+
+            var er = document.getElementById('error')
         if (er != null) {
             if ($('#error').text() == 'Failed')
                 swal("Không thành công", "Thao tác thất bại, vui lòng thực hiện lại", "error");
@@ -387,36 +387,35 @@
         }
     });
 
-    function CanceledOrder(id, payType)
-    {
-            var _id = id;
-            if (payType == "1") {
-                swal("Thông báo", "Đơn hàng không thể hủy do bạn đã thanh toán, bạn cần liên hệ với shop!", "error");
-            }
-            else {
-                swal("Bạn có muốn hủy đơn hàng này không?", {
-                    title: 'Thông báo',
-                    icon: 'info',
-                    buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
-                }).then(function (isConfirm) {
-                    if (isConfirm) {
-                        debugger
-                        
-                        $.ajax({
-                            url: "/Order/CheckOrderStatus?canceled=" + _id,
-                            method: 'GET',
-                            contentType: 'application/json',
-                            success: function () {
-                                swal("Thành công", "Đơn hàng đã được hủy!", "success");
-                                location.href = "/Order/ViewOrderCustomer"
-                            }, error: function (data) {
-                                swal("Thông báo", "Đơn hàng không chưa được hủy!", "error");
-                            }
-                        })
-                    } else {
-                        swal("Thông báo", "Đơn hàng chưa được hủy!", "error");
-                    }
-                });
-            }
+    function CanceledOrder(id, payType) {
+        var _id = id;
+        if (payType == "1") {
+            swal("Thông báo", "Đơn hàng không thể hủy do bạn đã thanh toán, bạn cần liên hệ với shop!", "error");
+        }
+        else {
+            swal("Bạn có muốn hủy đơn hàng này không?", {
+                title: 'Thông báo',
+                icon: 'info',
+                buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
+            }).then(function (isConfirm) {
+                if (isConfirm) {
+                    debugger
+
+                    $.ajax({
+                        url: "/Order/CheckOrderStatus?canceled=" + _id,
+                        method: 'GET',
+                        contentType: 'application/json',
+                        success: function () {
+                            swal("Thành công", "Đơn hàng đã được hủy!", "success");
+                            location.href = "/Order/ViewOrderCustomer"
+                        }, error: function (data) {
+                            swal("Thông báo", "Đơn hàng không chưa được hủy!", "error");
+                        }
+                    })
+                } else {
+                    swal("Thông báo", "Đơn hàng không chưa được hủy!", "error");
+                }
+            });
+        }
     }
 </script>

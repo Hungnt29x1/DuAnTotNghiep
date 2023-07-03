@@ -14,13 +14,13 @@ namespace GProject.WebApplication.Services
         public async Task<bool> AddToOrder(int selectVoucher, string cGiamGia, string cShippingFee, string cTotalMoney, string ShippingFullName, string ShippingPhone,
             string ShippingCity, string ShippingDistrict, string ShippingTown, string ShippingAddress, string ShippingEmail, string cDescription, int PaymentType = 0, Guid? customer_id = null, List<ProdOrder>? prodOrders = null)
         {
-			var lstCart = await Commons.GetAll<Cart>(String.Concat(Commons.mylocalhost, "Cart/get-all-Cart"));
-			var lstProductvariation = await Commons.GetAll<ProductVariation>(String.Concat(Commons.mylocalhost, "ProductVariation/get-all-ProductVariation"));
-			var lstCartDetail = await Commons.GetAll<CartDetail>(String.Concat(Commons.mylocalhost, "Cart/get-all-cart-detail"));
+            var lstCart = await Commons.GetAll<Cart>(String.Concat(Commons.mylocalhost, "Cart/get-all-Cart"));
+            var lstProductvariation = await Commons.GetAll<ProductVariation>(String.Concat(Commons.mylocalhost, "ProductVariation/get-all-ProductVariation"));
+            var lstCartDetail = await Commons.GetAll<CartDetail>(String.Concat(Commons.mylocalhost, "Cart/get-all-cart-detail"));
 
             string strUrl = "";
             Guid order_id = Guid.NewGuid();
-            
+
 
             //Order
             Order order = new Order();
@@ -39,7 +39,8 @@ namespace GProject.WebApplication.Services
             order.ShippingPhone = ShippingPhone;
             order.ShippingEmail = ShippingEmail;
             order.TotalMoney = decimal.Parse(cTotalMoney);
-            order.ShippingFee = decimal.Parse(cShippingFee);
+            //order.ShippingFee = decimal.Parse(cShippingFee);
+            order.ShippingFee = cShippingFee != null ? decimal.Parse(cShippingFee) : (decimal?)null;
             order.Description = cDescription;
             order.Status = GProject.Data.Enums.OrderStatus.InProgress;
             order.VoucherId = selectVoucher;
@@ -52,7 +53,7 @@ namespace GProject.WebApplication.Services
             if (!await Commons.Add_or_UpdateAsync(order, strUrl))
                 return false;
 
-            
+
 
 
             //-- Add vào bảng OrderDetail và xóa nó khỏi giỏ hàng
@@ -68,7 +69,7 @@ namespace GProject.WebApplication.Services
 
                 //-- Add vào OrderDetail
                 if (!await Commons.Add_or_UpdateAsync(orderDetail, String.Concat(Commons.mylocalhost, "Order/add-Order-detail")))
-                    return false;               
+                    return false;
 
 
                 var result = lstCartDetail.FirstOrDefault(x => x.CartId.ToString() == item.cartId && x.ProductVariationId.ToString() == item.prodVariationId);
@@ -96,18 +97,18 @@ namespace GProject.WebApplication.Services
             var isExist = (from c in lstCart join b in lstCartDetail on c.Id equals b.CartId where c.CustomerId == customer_id select b).FirstOrDefault();
             if (isExist == null)
             {
-				string urlRemoveCart = string.Concat(Commons.mylocalhost, "Cart/delete-Cart?id=", new Guid(prodOrders.Select(c => c.cartId).FirstOrDefault().NullToString()));
-				var RestRemoveCart = new RestSharpHelper(urlRemoveCart);
-				var resultRemoveCart = await RestRemoveCart.RequestBaseAsync(urlRemoveCart, RestSharp.Method.Delete);
-				if (!resultRemoveCart.IsSuccessful)
-					return false;
-			}
+                string urlRemoveCart = string.Concat(Commons.mylocalhost, "Cart/delete-Cart?id=", new Guid(prodOrders.Select(c => c.cartId).FirstOrDefault().NullToString()));
+                var RestRemoveCart = new RestSharpHelper(urlRemoveCart);
+                var resultRemoveCart = await RestRemoveCart.RequestBaseAsync(urlRemoveCart, RestSharp.Method.Delete);
+                if (!resultRemoveCart.IsSuccessful)
+                    return false;
+            }
 
             return true;
         }
 
 
-        public async Task<bool> BuyNow(int selectVoucher, string cGiamGia, string cShippingFee,string pTotalMoney, string ShippingFullName, string ShippingPhone,
+        public async Task<bool> BuyNow(int selectVoucher, string cGiamGia, string cShippingFee, string pTotalMoney, string ShippingFullName, string ShippingPhone,
             string ShippingCity, string ShippingDistrict, string ShippingTown, string ShippingAddress, string ShippingEmail, string cDescription, int PaymentType = 0, Guid? customer_id = null, List<ProdOrder>? prodOrders = null)
         {
             var lstProductvariation = await Commons.GetAll<ProductVariation>(String.Concat(Commons.mylocalhost, "ProductVariation/get-all-ProductVariation"));
@@ -137,7 +138,8 @@ namespace GProject.WebApplication.Services
             order.ShippingPhone = ShippingPhone;
             order.ShippingEmail = ShippingEmail;
             order.TotalMoney = decimal.Parse(pTotalMoney);
-            order.ShippingFee = decimal.Parse(cShippingFee);
+            //order.ShippingFee = decimal.Parse(cShippingFee);
+            order.ShippingFee = cShippingFee != null ? decimal.Parse(cShippingFee) : (decimal?)null;
             order.Description = cDescription;
             order.Status = GProject.Data.Enums.OrderStatus.InProgress;
             order.VoucherId = selectVoucher;
@@ -211,7 +213,8 @@ namespace GProject.WebApplication.Services
                               t7 => t7.Id,
                               (t123456, t7) => new { t123456.t1, t123456.t2, t123456.t3, t123456.t4, t123456.t5, t123456.t6, t7 })
                         .Where(c => c.t5.Id == orderid)
-                        .Select(result => new {
+                        .Select(result => new
+                        {
                             Product = result.t1,
                             ProductVariation = result.t2,
                             Brand = result.t3,

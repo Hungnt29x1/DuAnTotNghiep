@@ -1,28 +1,15 @@
-﻿using GProject.Api.MyServices.IServices;
-using GProject.Api.MyServices.Services;
-using GProject.Data.DomainClass;
+﻿using GProject.Data.DomainClass;
 using GProject.WebApplication.Helpers;
 using GProject.WebApplication.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection.Metadata;
-using System.Security.Claims;
-using static System.Net.Mime.MediaTypeNames;
-using System.Net.NetworkInformation;
 using Newtonsoft.Json;
-using Microsoft.Extensions.Logging;
 using GProject.Data.MyRepositories.IRepositories;
-using GProject.WebApplication.Services;
-using static IdentityServer4.Models.IdentityResources;
 using System.Net.Mail;
 using System.Net;
 using GProject.Data.Enums;
 using GProject.WebApplication.Models.Payments;
 using GProject.WebApplication.Services.IServices;
-using GProject.WebApplication.Services;
-using IdentityServer4.Models;
 using X.PagedList;
-using Newtonsoft.Json.Linq;
 
 namespace GProject.WebApplication.Controllers
 {
@@ -106,7 +93,7 @@ namespace GProject.WebApplication.Controllers
                 }
 
                 if (!string.IsNullOrEmpty(sId))
-                    lstObjs = lstObjs.Where(c => c.OrderId.ToLower().Contains(sId.ToLower())).ToList();                
+                    lstObjs = lstObjs.Where(c => c.OrderId.ToLower().Contains(sId.ToLower())).ToList();
                 if (!string.IsNullOrEmpty(sName))
                     lstObjs = lstObjs.Where(c => c.ShippingFullName.ToLower().Contains(sName.ToLower())).ToList();
                 if (!string.IsNullOrEmpty(sEmail))
@@ -115,11 +102,11 @@ namespace GProject.WebApplication.Controllers
                     lstObjs = lstObjs.Where(c => c.ShippingPhone.ToLower().Contains(sPhone.ToLower())).ToList();
                 if (valsPaymentType != -1)
                     lstObjs = lstObjs.Where(c => (int)c.PaymentType == sPaymentType).ToList();
-                if(history == 1)
+                if (history == 1)
                     lstObjs = lstObjs.Where(c => c.HistoryLogChange != null).ToList();
-                if(history == 0)
+                if (history == 0)
                     lstObjs = lstObjs.Where(c => c.HistoryLogChange == null).ToList();
-   
+
                 lstObjs = lstObjs.OrderBy(c => c.Status).ThenByDescending(c => c.CreateDate).ToList();
 
                 // const int pageSize = 2;
@@ -129,7 +116,7 @@ namespace GProject.WebApplication.Controllers
                 // var lstData = lstObjs.Skip((pg - 1) * pageSize).Take(pageSize).ToList();
                 if (page == null) page = 1;
                 var pageNumber = page ?? 1;
-                var pageSize = 10;
+                var pageSize = 5;
                 var data = new OrderDto() { Orders = lstObjs.ToList() };
 
                 //this.ViewBag.Pager = pager;
@@ -316,13 +303,13 @@ namespace GProject.WebApplication.Controllers
 
         [HttpPost]
         public async Task<ActionResult> Order(
-            int selectVoucher, 
-            string DiscountCode, 
-            string cGiamGia, 
-            string idDeliveryAddress, 
-            string cShippingFee, 
-            string cTotalMoney, 
-            string ShippingEmail, 
+            int selectVoucher,
+            string DiscountCode,
+            string cGiamGia,
+            string idDeliveryAddress,
+            string cShippingFee,
+            string cTotalMoney,
+            string ShippingEmail,
             string cDescription,
             string ShippingFullName,
             string ShippingPhone,
@@ -411,7 +398,7 @@ namespace GProject.WebApplication.Controllers
 
                         var getCustomerNew = await Commons.GetAll<Customer>(String.Concat(Commons.mylocalhost, "Customer/get-all-Customer"));
                         _customerId = (getCustomerNew.FirstOrDefault(x => x.PhoneNumber == ShippingPhone && x.Email == ShippingEmail)).Id;
-                        
+
                     }
 
                     // Commons.setObjectAsJson(HttpContext.Session, "userNotLogin", new Customer()
@@ -466,9 +453,9 @@ namespace GProject.WebApplication.Controllers
 
                 GProject.WebApplication.Services.OrderService pService = new GProject.WebApplication.Services.OrderService();
                 bool result = await pService.AddToOrder(
-                    voucherId, 
-                    cGiamGia, 
-                    cShippingFee, 
+                    voucherId,
+                    cGiamGia,
+                    cShippingFee,
                     cTotalMoney,
                     _ShippingFullName,
                     _ShippingPhone,
@@ -476,10 +463,10 @@ namespace GProject.WebApplication.Controllers
                     _District,
                     _Wards,
                     _ShippingAddress,
-                    ShippingEmail, 
-                    cDescription, 
-                    PaymentType, 
-                    _customerId, 
+                    ShippingEmail,
+                    cDescription,
+                    PaymentType,
+                    _customerId,
                     prodOrders);
 
                 if (!result)
@@ -494,13 +481,13 @@ namespace GProject.WebApplication.Controllers
                     ViewData["Mess"] = HttpContext.Session.GetString("mess");
                 }
 
-                if(customer == null)
+                if (customer == null)
                 {
                     List<CartDetail> cart_Details = HttpContext.Session.GetObjectFromJson<List<CartDetail>>("add_cart_details");
-                    foreach(var item in prodOrders)
+                    foreach (var item in prodOrders)
                     {
                         var delete_cart_Details = cart_Details.FirstOrDefault(x => x.ProductVariationId.ToString() == item.prodVariationId);
-                        if(delete_cart_Details != null)
+                        if (delete_cart_Details != null)
                             cart_Details.Remove(delete_cart_Details);
                     }
 
@@ -763,8 +750,7 @@ namespace GProject.WebApplication.Controllers
                 GProject.WebApplication.Services.ProductService pService = new GProject.WebApplication.Services.ProductService();
                 var customer = HttpContext.Session.GetObjectFromJson<Customer>("userLogin");
 
-                
-                
+
                 //-- Lấy danh sách từ api
                 var lstOrder = await Commons.GetAll<Order>(String.Concat(Commons.mylocalhost, "Order/get-all-Order"));
                 var lstProductvariation = await pService.ShowMyOrder(null);
@@ -777,7 +763,7 @@ namespace GProject.WebApplication.Controllers
                 ViewData["totalXCan"] = lstOrder.Where(x => x.Status == OrderStatus.Canceled).ToList().Count();
                 ViewData["totalXacNhan"] = lstOrder.Where(x => x.Status == OrderStatus.DaXacNhan).ToList().Count();
 
-
+                ViewData["GetAll"] = sortOrder == "GetAll" ? "NotSort" : "GetAll";
                 ViewData["InProgress"] = sortOrder == "InProgress" ? "NotSort" : "InProgress";
                 ViewData["Confirmed"] = sortOrder == "Confirmed" ? "NotSort" : "Confirmed";
                 ViewData["Delivery"] = sortOrder == "Delivery" ? "NotSort" : "Delivery";
@@ -815,10 +801,15 @@ namespace GProject.WebApplication.Controllers
                     case "NotSort":
                         lstOrder = lstOrder.ToList();
                         break;
-                    default: break;
+                    case "GetAll":
+                        lstOrder = lstOrder.ToList();
+                        break;
+                    default:
+                        lstOrder = lstOrder.ToList(); 
+                        break;
                 }
 
-                if(orderId != null)
+                if (orderId != null)
                 {
                     lstOrder = lstOrder.Where(x => x.OrderId == orderId).ToList();
                     @ViewData["orderId"] = orderId;
@@ -936,7 +927,7 @@ namespace GProject.WebApplication.Controllers
                 HttpContext.Session.SetString("mess", "Success");
                 ViewData["Mess"] = HttpContext.Session.GetString("mess");
             }
-            
+
             ViewBag.Message = response;
             return RedirectToAction("ViewOrderCustomer", "Order");
         }
@@ -967,7 +958,7 @@ namespace GProject.WebApplication.Controllers
                         order.HistoryLogChange = strChange + order.HistoryLogChange.NullToString();
                         result = orderRepository.Update(order);
                     }
-                    
+
                 }
                 if (!result)
                     HttpContext.Session.SetString("mess", "Failed");
@@ -1006,7 +997,7 @@ namespace GProject.WebApplication.Controllers
                     strChange += $"\n Phí giao hàng từ {order.ShippingFee} -> {orderDTO.ShippingFee}";
                 if (order.TotalMoney != orderDTO.TotalMoney)
                     strChange += $"\n Tổng tiền từ {order.TotalMoney} -> {orderDTO.TotalMoney}";
-                
+
                 #endregion
 
 
@@ -1033,11 +1024,11 @@ namespace GProject.WebApplication.Controllers
                 order.TotalMoney = orderDTO.TotalMoney;
                 order.Status = orderDTO.Status;
                 order.Description = orderDTO.Description;
-                
-                strChange +=  $"<------------------------------------------>";
+
+                strChange += $"<------------------------------------------>";
                 order.HistoryLogChange = strChange + order.HistoryLogChange.NullToString();
 
-                
+
                 if (!orderRepository.Update(order))
                     HttpContext.Session.SetString("mess", "Failed");
                 else
@@ -1051,7 +1042,7 @@ namespace GProject.WebApplication.Controllers
             }
         }
 
-        public async Task<ActionResult> ChangeQuantityOrder(string orderid, string prodId, string quantity, int? colorId, int? sizeId )
+        public async Task<ActionResult> ChangeQuantityOrder(string orderid, string prodId, string quantity)
         {
             try
             {
@@ -1059,7 +1050,7 @@ namespace GProject.WebApplication.Controllers
                 var employee = HttpContext.Session.GetObjectFromJson<Employee>("userLogin");
                 string strChange = $"Thời gian: {DateTime.Now} \nNgười thay đổi: {employee.Email}";
                 var orDetail = orderDetailRepository.GetAll().FirstOrDefault(c => c.OrderId == new Guid(orderid) && c.ProductVariationId == new Guid(prodId));
-                
+
                 if (orDetail != null)
                 {
                     var prodvariation = productVariationRepository.GetAll().FirstOrDefault(c => c.Id == orDetail.ProductVariationId);
@@ -1072,13 +1063,13 @@ namespace GProject.WebApplication.Controllers
                     decimal totalPaymentChange = (order.TotalMoney - orDetail.TotalMoney) + (int.Parse(quantity) * orDetail.Price);
                     strChange += $"\n Số lượng của sản phẩm {GetProductVariationById(new Guid(prodId))} từ {orDetail.Quantity} -> {quantity}";
                     strChange += $"\n Tổng tiền của sản phẩm {GetProductVariationById(new Guid(prodId))} từ {orDetail.TotalMoney.ToString("#,##0.##")} -> {(int.Parse(quantity) * orDetail.Price).ToString("#,##0.##")}";
-                    
+
                     orDetail.Quantity = int.Parse(quantity);
                     orDetail.TotalMoney = int.Parse(quantity) * orDetail.Price;
                     result = orderDetailRepository.Update(orDetail);
                     if (result)
                     {
-                        
+
                         strChange += $"\n Tổng tiền thanh toán từ {order.TotalMoney.ToString("#,##0.##")} -> {totalPaymentChange.ToString("#,##0.##")}";
                         strChange += $"<------------------------------------------>";
                         order.TotalMoney = totalPaymentChange;
@@ -1102,7 +1093,7 @@ namespace GProject.WebApplication.Controllers
 
         public async Task<ActionResult> ShowProductForAdmin(Guid orderid, string prodName, Guid? category, int? brand, decimal? fPrice, decimal? tPrice, int? type, int pg = 1, int pageSize = 10, string Keyword = null)
         {
-            
+
             try
             {
                 TempData["orderId"] = orderid;
@@ -1130,7 +1121,7 @@ namespace GProject.WebApplication.Controllers
             }
         }
 
-        
+
 
         [Route("/productdetail-for-admin/{product_id}")]
         public async Task<ActionResult> ProductDetailForAdmin(Guid product_id)
@@ -1166,7 +1157,7 @@ namespace GProject.WebApplication.Controllers
                 ProdOrder prodOrder = JsonConvert.DeserializeObject<ProdOrder>(products);
                 ProductVariation productVariation = productVariationRepository.GetAll().FirstOrDefault(c => c.ProductId == new Guid(prodOrder.productId) && c.ColorId == prodOrder.color && c.SizeId == prodOrder.size);
                 OrderDetail orderDetail = orderDetailRepository.GetAll().FirstOrDefault(c => c.OrderId == orderid && c.ProductVariationId == productVariation.Id);
-                
+
 
                 if (orderDetail != null)
                 {
@@ -1244,7 +1235,7 @@ namespace GProject.WebApplication.Controllers
                             product_code = pvcs.prd.ProductCode
                         })
                         .FirstOrDefault();
-            
+
             return result != null ? $" (Mã sản phẩm: {result.product_code.NullToString()}, Tên sản phẩm: {result.product_name.NullToString()}, Màu sắc: {result.color_name.NullToString()}, Size: {result.size_code.NullToString()})" : "";
         }
     }

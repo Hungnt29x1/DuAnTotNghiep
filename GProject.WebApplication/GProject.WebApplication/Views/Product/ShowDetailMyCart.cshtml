@@ -519,7 +519,7 @@
                         $("#idDeliveryAddress").val(result.id)
                     }
                     else {
-                        var total = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, '')) - parseFloat(document.querySelector('#txtGiamGia').innerText.replace(/\./g, ''))
+                        var total = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/,/g, '')) - parseFloat(document.querySelector('#txtGiamGia').innerText.replace(/,/g, ''))
                         if (total < 0) {
                             total = 0;
                         }
@@ -539,7 +539,7 @@
                 type: "GET",
                 success: function (result) {
                     var total = 0;
-                    total = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, '')) + result - parseFloat(document.querySelector('#txtGiamGia').innerText.replace(/\./g, ''));                    
+                    total = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/,/g, '')) + result - parseFloat(document.querySelector('#txtGiamGia').innerText.replace(/,/g, ''));                    
                     if (total < 0) {
                         total = 0;
                     }
@@ -581,7 +581,7 @@
                 url: "/Product/GetVoucher?id=" + _id,
                 type: "GET",
                 success: function (result) {
-                    let totalProduct = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, ''));
+                    let totalProduct = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/,/g, ''));
                     let discount = 0;
                     var total = 0;
                     if (result != null) {
@@ -594,7 +594,7 @@
                             discount = result.discountRate
                         }
                         $("#txtGiamGia").text(commasThousands(discount))
-                        total = totalProduct - discount + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/\./g, ''));
+                        total = totalProduct - discount + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/,/g, ''));
 
                         swal("Áp dụng thành công mã: " + result.name, "Bạn được giảm: " + commasThousands(discount) + " đ", "success");
                     }
@@ -602,7 +602,7 @@
                         swal("Thông báo!", "Mã giảm giá không được áp dụng!", "error");
                         $("#txtGiamGia").text(0)
                         $("#txtDiscountForm").text("đ")
-                        total = totalProduct + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/\./g, ''));
+                        total = totalProduct + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/,/g, ''));
                     }
                     
                     if(total < 0)
@@ -684,7 +684,7 @@
             }
 
 
-            var total = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, ''))
+            var total = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/,/g, ''))
             GetDataVoucher(total);
             $('#textTotalMoney').text(commasThousands(total));
             $('#cTotalMoney').val(total);
@@ -704,7 +704,7 @@
                 _product.size = $(this).parents("tr").find("select.size").val();
                 _product.price = ($(this).parents("tr").find("input[type=text].price").val() || 0).replace(/\./g, '');
                 _product.quantity = _quantity;
-                _product.totalMoneyItem = ($(this).parents("tr").find("input[type=text].totalMoneyItem").val() || 0).replace(/\./g, '');
+                _product.totalMoneyItem = ($(this).parents("tr").find("input[type=text].totalMoneyItem").val() || 0).replace(/,/g, '');
                 products.push(_product);
             });
             if (products.length == 0) {
@@ -772,7 +772,7 @@
             url: "/Product/GetVoucher?discountCode=" + _discountCode,
             type: "GET",
             success: function (result) {
-                let totalProduct = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, ''));
+                let totalProduct = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/,/g, ''));
                 let discount = 0;
                 var total = 0;
                 if (result != null) {
@@ -785,7 +785,7 @@
                         discount = result.discountRate
                     }
                     $("#txtGiamGia").text(commasThousands(discount))
-                    total = totalProduct - discount + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/\./g, ''));
+                    total = totalProduct - discount + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/,/g, ''));
 
                     swal("Áp dụng thành công mã: " + _discountCode, "Bạn được giảm: " + commasThousands(discount) + " đ ", "success");
                 }
@@ -793,7 +793,7 @@
                     swal("Thông báo!", "Mã giảm giá không được áp dụng!", "error");
                     $("#txtGiamGia").text(0)
                     $("#txtDiscountForm").text("đ")
-                    total = totalProduct + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/\./g, ''));
+                    total = totalProduct + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/,/g, ''));
                 }
 
                 if (total < 0) {
@@ -833,7 +833,7 @@
 
 
     function changeSelectedProd(param) {
-        var totalItem = ($(param).parents("tr").find("input[type=text].totalMoneyItem").val() || 0).replace(/\./g, '');
+        var totalItem = ($(param).parents("tr").find("input[type=text].totalMoneyItem").val() || 0).replace(/,/g, '');
         var _totalPayment = parseFloat($('#totalPayment').val()) || 0;
         var selectedCount = parseInt($('#selected-invs').text()) || 0;
         if (param.checked) {
@@ -849,13 +849,13 @@
 
     function commasThousands(nStr) {
         nStr += '';
-        nStr = nStr.replace(/\./g, '');
+        nStr = nStr.replace(/,/g, '');
         x = nStr.split('.');
         x1 = x[0];
         x2 = x.length > 1 ? '.' + x[1] : '';
         var rgx = /(\d+)(\d{3})/;
         while (rgx.test(x1)) {
-            x1 = x1.replace(rgx, '$1' + '.' + '$2');
+            x1 = x1.replace(rgx, '$1' + ',' + '$2');
         }
         return x1 + x2;
     }
@@ -925,9 +925,9 @@
             _product.prodVariationId = $(this).parents("tr").find("input[type=text].prodVariationId").val();
             _product.size = $(this).parents("tr").find("select.size").val();
 
-            _product.price = ($(this).parents("tr").find("input[type=text].price").val() || 0).replace(/\./g, '');
+            _product.price = ($(this).parents("tr").find("input[type=text].price").val() || 0).replace(/,/g, '');
             _product.quantity = parseInt($(this).parents("tr").find("input[type=text].quantity").val()) || 0;
-            _product.totalMoneyItem = ($(this).parents("tr").find("input[type=text].totalMoneyItem").val() || 0).replace(/\./g, '');
+            _product.totalMoneyItem = ($(this).parents("tr").find("input[type=text].totalMoneyItem").val() || 0).replace(/,/g, '');
             products.push(_product);
         });
         if (products.length == 0) {

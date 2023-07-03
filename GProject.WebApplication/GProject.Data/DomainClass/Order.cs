@@ -32,7 +32,7 @@ namespace GProject.Data.DomainClass
         public float? DiscountRate { get; set; }
 
         [Column(TypeName = "decimal(20, 0)")]
-        public decimal ShippingFee { get; set; }
+        public decimal? ShippingFee { get; set; }
         [Column(TypeName = "decimal(20, 0)")]
         public decimal TotalMoney { get; set; }
         public OrderStatus Status { get; set; }

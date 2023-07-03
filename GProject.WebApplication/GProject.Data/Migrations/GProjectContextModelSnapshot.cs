@@ -796,7 +796,7 @@ namespace GProject.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<decimal>("ShippingFee")
+                    b.Property<decimal?>("ShippingFee")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(20,0)")
                         .HasDefaultValueSql("((0))");

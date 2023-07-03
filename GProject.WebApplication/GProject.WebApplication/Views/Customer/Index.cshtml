@@ -58,12 +58,12 @@
                 <div class="col-md-4">
                     <label class="col-md-5">Email:</label>
                     <input id="Email" name="Email" type="email" placeholder="name@example.com" maxlength="200"
-                        class="form-control" />
+                           class="form-control" />
                 </div>
                 <div class="col-md-4">
                     <label class="col-md-5">Mật khẩu:</label>
                     <input id="Password" name="Password" type="password" placeholder="password" maxlength="200"
-                        class="form-control" />
+                           class="form-control" />
                 </div>
 
             </div>
@@ -71,12 +71,12 @@
                 <div class="col-md-4">
                     <label class="col-md-5">Ngày sinh:<span style="color: red">(*)</span></label>
                     <input id="DateOfBirth" name="DateOfBirth" type="date"
-                        value="<?php echo date('Y-m-d'); ?>" maxlength="200" class="form-control" />
+                           value="<?php echo date('Y-m-d'); ?>" maxlength="200" class="form-control" />
                 </div>
                 <div class="col-md-4">
                     <label class="col-md-5">Số điện thoại:</label>
                     <input id="PhoneNumber" name="PhoneNumber" type="text" placeholder="(+84) ..." maxlength="15"
-                        class="form-control" />
+                           class="form-control" />
                 </div>
                 <div class="col-md-4">
                     <label>Giới tính:</label>
@@ -93,12 +93,12 @@
                 <div class="col-md-4">
                     <label class="col-md-5">Địa chỉ:</label>
                     <input id="Address" name="Address" type="text" placeholder="Address" maxlength="200"
-                        class="form-control" />
+                           class="form-control" />
                 </div>
                 <div class="col-md-4">
                     <label class="col-md-5">Mô tả:</label>
                     <input id="Description" name="Description" type="text" placeholder="Description" maxlength="200"
-                        class="form-control" />
+                           class="form-control" />
                 </div>
                 <div class="col-md-4">
                     <label>Trạng thái</label>
@@ -118,8 +118,9 @@
                 </div>
             </div>
             <div style="margin-top: 10px;">
-                <button id="btnSave" class="btn btn-success" type="submit" style="height:40px;width:110px;"><i
-                        class="fa fa-plus" aria-hidden="true" style="margin-right:4px;"></i>Lưu</button>
+                <button id="btnSave" class="btn btn-success" type="submit" style="height:40px;width:110px;">
+                    <i class="fa fa-plus" aria-hidden="true" style="margin-right:4px;"></i>Lưu
+                </button>
             </div>
         </div>
     </form>
@@ -141,7 +142,7 @@
                                     <label>Tên khách hàng</label>
                                     <div class="col-md-9 col-xs-12">
                                         <input type="text" id="sName" name="sName" value="@ViewData["sName"]"
-                                            class="form-control" />
+                                               class="form-control" />
                                     </div>
                                 </div>
                             </div>
@@ -150,14 +151,14 @@
                                     <label>Email</label>
                                     <div class="col-md-9 col-xs-12">
                                         <input type="email" id="sEmail" name="sEmail" value="@ViewData["sEmail"]"
-                                            class="form-control" />
+                                               class="form-control" />
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Số điện thoại</label>
                                     <div class="col-md-9 col-xs-12">
                                         <input type="text" id="sPhone" maxlength="15" name="sPhone"
-                                            value="@ViewData["sPhone"]" class="form-control" />
+                                               value="@ViewData["sPhone"]" class="form-control" />
                                     </div>
                                 </div>
                             </div>
@@ -196,7 +197,9 @@
                     </div>
                     <div class="panel-footer text-center">
                         <button class="btn btn-success" onclick="$('.searchText').removeAttr('disabled')"
-                            type="submit"><i class="fa fa-search"></i></button>
+                                type="submit">
+                            <i class="fa fa-search"></i>
+                        </button>
                         <a class="btn btn-outline-info" asp-action="Index">
                             <i class="fas fa-undo-alt"></i>
                         </a>
@@ -209,8 +212,10 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title"
-                    style="margin-top: 20px; text-align:center; height:50px; padding:10px 10px 10px 10px;">Danh sách
-                    khách hàng</h3>
+                    style="margin-top: 20px; text-align:center; height:50px; padding:10px 10px 10px 10px;">
+                    Danh sách
+                    khách hàng
+                </h3>
             </div>
             <div class="panel-body">
                 <div class="table-responsive" style="overflow-y: auto; max-height: 700px;">
@@ -238,7 +243,7 @@
                                         <td class="text-center">@i</td>
                                         <td>
                                             <img style="width:120px;height:130px; border;1px solid;"
-                                                src="~/images/@item.Image" />
+                                                 src="~/images/@item.Image" />
                                         </td>
                                         <td>
                                             @item.CustomerId
@@ -385,10 +390,21 @@
 
     function checkValidateData() {
         var regexPass = /^(?=.*[A-Z])(?=.*\d).{6,50}$/;
-        if (!regexPass.test($('#Password').val())) {
-            sweetAlert("Thông báo", "Thông tin mật khẩu không hợp lệ", "error");
-            return false;
+        var id = $("#Id").val();
+        if (id != null) {
+            if ($('Password').val() != null) {
+                if (!regexPass.test($('#Password').val())) {
+                    sweetAlert("Thông báo", "Thông tin mật khẩu không hợp lệ!", "error");
+                    return false;
+                }
+            }
+        } else {
+            if (!regexPass.test($('#Password').val())) {
+                sweetAlert("Thông báo", "Thông tin mật khẩu không hợp lệ", "error");
+                return false;
+            }
         }
+
         if ($('#PhoneNumber').val() == '') {
             sweetAlert("Thông báo", "Thông tin số điện thoại không được để trống", "error");
             return false;
@@ -409,9 +425,15 @@
             sweetAlert("Thông báo", "Thông tin địa chỉ không được để trống", "error");
             return false;
         }
-        if ($('#Image_Upload').val() == '') {
-            sweetAlert("Thông báo", "Thông tin hình ảnh không được để trống", "error");
-            return false;
+        if (id != null) {
+            if ($('#Image_Upload').val() == '') {
+                return true;
+            }
+        } else {
+            if ($('#Image_Upload').val() == '') {
+                sweetAlert("Thông báo", "Thông tin hình ảnh không được để trống", "error");
+                return false;
+            }
         }
         return true;
     }
@@ -432,7 +454,17 @@
 
     $(document).ready(function () {
         $("#btnSave").click(function () {
-
+            var id = $("#Id").val();
+            var name = $("#Name").val();
+            var email = $("#Email").val();
+            var password = $("#Password").val();
+            var dateOfBirth = $("#DateOfBirth").val();
+            var phoneNumber = $("#PhoneNumber").val();
+            var sex = $("#Sex").val();
+            var address = $("#Address").val();
+            var description = $("#Description").val();
+            var status = $("#Status").val();
+            var image = $("#Image_Upload").get(0).files[0];
             var regexPass = /^(?=.*[A-Z])(?=.*\d).{6,50}$/;
             if ($('#Name').val() == '') {
                 sweetAlert("Thông báo", "Thông tin tên khách hàng không được để trống", "error");
@@ -442,10 +474,7 @@
                 sweetAlert("Thông báo", "Thông tin email không được để trống", "error");
                 return false;
             }
-            if (!regexPass.test($('#Password').val())) {
-                sweetAlert("Thông báo", "Thông tin mật khẩu không hợp lệ", "error");
-                return false;
-            }
+           
             if ($('#DateOfBirth').val() == '') {
                 sweetAlert("Thông báo", "Thông ngày sinh không được để trống", "error");
                 return false;
@@ -462,22 +491,28 @@
                 sweetAlert("Thông báo", "Thông tin địa chỉ không được để trống", "error");
                 return false;
             }
-            if ($('#Image_Upload').val() == '') {
-                sweetAlert("Thông báo", "Thông tin hình ảnh không được để trống", "error");
-                return false;
+            if (id != null) {
+                if ($('Password').val() != null) {
+                    if (!regexPass.test($('#Password').val())) {
+                        sweetAlert("Thông báo", "Thông tin mật khẩu không hợp lệ!", "error");
+                        return false;
+                    }
+                }
+            } else {
+                if (!regexPass.test($('#Password').val())) {
+                    sweetAlert("Thông báo", "Thông tin mật khẩu không hợp lệ", "error");
+                    return false;
+                }
             }
-
-            var id = $("#Id").val();
-            var name = $("#Name").val();
-            var email = $("#Email").val();
-            var password = $("#Password").val();
-            var dateOfBirth = $("#DateOfBirth").val();
-            var phoneNumber = $("#PhoneNumber").val();
-            var sex = $("#Sex").val();
-            var address = $("#Address").val();
-            var description = $("#Description").val();
-            var status = $("#Status").val();
-            var image = $("#Image_Upload").get(0).files[0];
+            if (id != null) {
+                if ($('#Image_Upload').val() == '') {}
+            } else {
+                if ($('#Image_Upload').val() == '') {
+                    sweetAlert("Thông báo", "Thông tin hình ảnh không được để trống", "error");
+                    return false;
+                }
+            }
+            
             var data = new FormData();
             data.append('Id', id);
             data.append('Name', name);

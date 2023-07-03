@@ -60,7 +60,7 @@ namespace GProject.WebApplication.Controllers
                 if (!string.IsNullOrEmpty(HttpContext.Session.GetString("mess")))
                     ViewData["Mess"] = HttpContext.Session.GetString("mess");
                 HttpContext.Session.Remove("mess");
-                return View(lstObjs.ToPagedList(pageNumber, pageSize));
+                return View(lstObjs.OrderByDescending(c=>c.CreateDate).ToPagedList(pageNumber, pageSize));
             }
             catch (Exception ex)
             {
@@ -123,6 +123,8 @@ namespace GProject.WebApplication.Controllers
             {
                 if (!string.IsNullOrEmpty(HttpContext.Session.GetString("myRole")) && HttpContext.Session.GetString("myRole").NullToString() == "customer")
                     return RedirectToAction("AccessDenied", "Account");
+                var lstObjs = await Commons.GetAll<Customer>(String.Concat(Commons.mylocalhost, "Customer/get-all-Customer"));
+                var checkId = lstObjs.FirstOrDefault(c => c.Id == Customer.Id);
                 //-- Parse lại dữ liệu từ ViewModel
                 var cusdata = new Customer();
                 cusdata.Id = Customer.Id;
@@ -131,7 +133,18 @@ namespace GProject.WebApplication.Controllers
                 cusdata.CustomerId = Commons.RandomString(10);
 
                 if (!string.IsNullOrEmpty(Customer.Password)) cusdata.Password = Customer.Password;
-
+                if (Customer.Id != null)
+                {
+                    if (!string.IsNullOrEmpty(Customer.Password))
+                    {
+                        cusdata.Password = Customer.Password;
+                    }
+                    else { cusdata.Password = checkId.Password; }
+                }
+                else
+                {
+                    cusdata.Password = Customer.Password;
+                }
                 cusdata.CreateDate = DateTime.Now;
                 cusdata.UpdateDate = DateTime.Now;
                 cusdata.DateOfBirth = Customer.DateOfBirth;
@@ -140,14 +153,34 @@ namespace GProject.WebApplication.Controllers
                 cusdata.Address = Customer.Address;
                 cusdata.Status = Customer.Status;
                 if (!string.IsNullOrEmpty(Customer.Description)) cusdata.Description = Customer.Description;
-                if (Customer.Image_Upload != null)
+                
+                if (Customer.Id != null)
                 {
-                    string full_path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", Customer.Image_Upload.FileName);
-                    using (var file = new FileStream(full_path, FileMode.Create))
+                    if (Customer.Image_Upload == null)
                     {
-                        Customer.Image_Upload.CopyTo(file);
+                        cusdata.Image = checkId.Image;
                     }
-                    cusdata.Image = Customer.Image_Upload.FileName;
+                    else
+                    {
+                        string full_path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", Customer.Image_Upload.FileName);
+                        using (var file = new FileStream(full_path, FileMode.Create))
+                        {
+                            Customer.Image_Upload.CopyTo(file);
+                        }
+                        cusdata.Image = Customer.Image_Upload.FileName;
+                    }
+                }
+                else
+                {
+                    if (Customer.Image_Upload != null)
+                    {
+                        string full_path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", Customer.Image_Upload.FileName);
+                        using (var file = new FileStream(full_path, FileMode.Create))
+                        {
+                            Customer.Image_Upload.CopyTo(file);
+                        }
+                        cusdata.Image = Customer.Image_Upload.FileName;
+                    }
                 }
                 string url = Commons.mylocalhost;
 

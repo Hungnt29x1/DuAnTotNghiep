@@ -42,7 +42,7 @@ namespace GProject.WebApplication.Models
         public string ShippingEmail { get; set; }
         public int? VoucherId { get; set; }
         public float? DiscountRate { get; set; }
-        public decimal ShippingFee { get; set; }
+        public decimal? ShippingFee { get; set; }
         public decimal TotalMoney { get; set; }
         public OrderStatus Status { get; set; }
         public string? Description { get; set; }
