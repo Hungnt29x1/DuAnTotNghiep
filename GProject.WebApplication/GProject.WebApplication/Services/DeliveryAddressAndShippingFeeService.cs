@@ -6,7 +6,7 @@ namespace GProject.WebApplication.Services
 {
     public class DeliveryAddressAndShippingFeeService
     {
-        private const string apiKey = "a5cac09d-cea5-11ed-a3ed-eac62dba9bd9";
+        private const string apiKey = "637170d5-942b-11ea-9821-0281a26fb5d4";
         public DeliveryAddressAndShippingFeeService()
         {
 
