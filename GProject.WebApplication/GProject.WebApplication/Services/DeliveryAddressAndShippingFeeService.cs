@@ -6,7 +6,7 @@ namespace GProject.WebApplication.Services
 {
     public class DeliveryAddressAndShippingFeeService
     {
-        private const string apiKey = "637170d5-942b-11ea-9821-0281a26fb5d4";
+        private const string apiKey = "5f94d72f-1a06-11ee-8506-6ead57e9219a";
         public DeliveryAddressAndShippingFeeService()
         {
 
@@ -137,6 +137,7 @@ namespace GProject.WebApplication.Services
 
             var dataAddress = new
             {
+                shop_id = 3787462,
                 from_district_id = 3440,
                 service_id = 100039,
                 to_district_id = to_district_id,

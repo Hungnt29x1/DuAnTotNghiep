@@ -14,6 +14,7 @@ using System.Net.Mail;
 using System.Net;
 using GProject.WebApplication.Services;
 using Microsoft.AspNetCore.Http;
+using Twilio.TwiML.Messaging;
 
 namespace GProject.WebApplication.Controllers
 {
@@ -560,7 +561,9 @@ namespace GProject.WebApplication.Controllers
                 var subject = "Reset your password";
                 var body = $"Mật khẩu của bạn là: {code}. ";
                 if (GuiMail(email, subject, body))
+                {
                     HttpContext.Session.SetString("mess", "Success");
+                }
                 else
                     HttpContext.Session.SetString("mess", "Failed");
                 HttpContext.Session.SetString("mess", "Success");
@@ -575,12 +578,17 @@ namespace GProject.WebApplication.Controllers
                 var subject = "Reset your password";
                 var body = $"Mật khẩu của bạn là: {code}. ";
                 if (GuiMail(email, subject, body))
+                {
                     HttpContext.Session.SetString("mess", "Success");
+                }
                 else
                     HttpContext.Session.SetString("mess", "Failed");
             }
-            HttpContext.Session.SetString("mess", "Failed");
-            return RedirectToAction("Login", "Account");
+            else
+            {
+                HttpContext.Session.SetString("mess", "Failed");
+            }
+            return RedirectToAction("ForgotPassword", "Account");
         }
 
         private string GenerateRandomCode(int length)
@@ -596,7 +604,7 @@ namespace GProject.WebApplication.Controllers
             try
             {
                 string fromEmail = "hungntph17579@fpt.edu.vn";
-                string password = "Trang2001";
+                string password = "rzzkasitfwitfxhi";
                 MailMessage message = new MailMessage();
                 message.From = new MailAddress(fromEmail);
                 message.Subject = subject;
