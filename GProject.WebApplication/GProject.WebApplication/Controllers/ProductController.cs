@@ -44,7 +44,7 @@ namespace GProject.WebApplication.Controllers
 			int? type,
 			string? clear,
 			int pg = 1,
-			int pageSize = 10,
+			int pageSize = 15,
 			string Keyword = null
 		)
 		{
