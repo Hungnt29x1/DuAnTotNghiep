@@ -50,7 +50,7 @@ namespace YourNamespace
         {
             services.AddSession(c =>
             {
-                c.IOTimeout = TimeSpan.FromSeconds(20);
+                c.IOTimeout = TimeSpan.FromMinutes(20);
                 c.Cookie.HttpOnly = true;
                 c.Cookie.IsEssential = true;
             });
@@ -65,6 +65,7 @@ namespace YourNamespace
                 dd.LoginPath = "/Account/login";
                 dd.LogoutPath = "/Account/logout";
                 dd.AccessDeniedPath = "/Account/AccessDenied";
+                dd.ExpireTimeSpan = TimeSpan.FromMinutes(20);
             })
             .AddGoogle(yy =>
             {

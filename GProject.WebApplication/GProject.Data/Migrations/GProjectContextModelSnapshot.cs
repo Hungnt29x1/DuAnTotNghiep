@@ -883,39 +883,62 @@ namespace GProject.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("(newid())");
 
-                    b.Property<string>("CreateBy")
+                    b.Property<string>("Alias")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreateDate")
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Contents")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Image")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsHot")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsNewfeed")
+                        .HasColumnType("bit");
 
-                    b.Property<int>("PostType")
+                    b.Property<int>("PostId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<bool>("Published")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("Subject")
+                    b.Property<string>("Scontents")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UpdateDate")
+                    b.Property<string>("Thumb")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("Views")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("EmployeeId");
 
                     b.ToTable("Posts", (string)null);
                 });
@@ -1132,6 +1155,35 @@ namespace GProject.Data.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("PromotionDetail", (string)null);
+                });
+
+            modelBuilder.Entity("GProject.Data.DomainClass.Reviews", b =>
+                {
+                    b.Property<Guid?>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("(newid())");
+
+                    b.Property<Guid>("AccountID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountID");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("GProject.Data.DomainClass.SendMail", b =>
@@ -1560,6 +1612,21 @@ namespace GProject.Data.Migrations
                     b.Navigation("ProductVariationId_Navigation");
                 });
 
+            modelBuilder.Entity("GProject.Data.DomainClass.Posts", b =>
+                {
+                    b.HasOne("GProject.Data.DomainClass.Category", "CategoryId_Navigation")
+                        .WithMany("Posts")
+                        .HasForeignKey("CategoryId");
+
+                    b.HasOne("GProject.Data.DomainClass.Employee", "EmployeeId_Navigation")
+                        .WithMany("Posts")
+                        .HasForeignKey("EmployeeId");
+
+                    b.Navigation("CategoryId_Navigation");
+
+                    b.Navigation("EmployeeId_Navigation");
+                });
+
             modelBuilder.Entity("GProject.Data.DomainClass.Product", b =>
                 {
                     b.HasOne("GProject.Data.DomainClass.Brand", "BrandId_Navigation")
@@ -1617,6 +1684,25 @@ namespace GProject.Data.Migrations
                     b.Navigation("PromotionId_Navidation");
                 });
 
+            modelBuilder.Entity("GProject.Data.DomainClass.Reviews", b =>
+                {
+                    b.HasOne("GProject.Data.DomainClass.Customer", "CustomerId_Navigation")
+                        .WithMany("Reviews")
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GProject.Data.DomainClass.Posts", "PostId_Navigation")
+                        .WithMany("Reviews")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CustomerId_Navigation");
+
+                    b.Navigation("PostId_Navigation");
+                });
+
             modelBuilder.Entity("GProject.Data.DomainClass.ViewHistory", b =>
                 {
                     b.HasOne("GProject.Data.DomainClass.Customer", "CustomerId_Navigation")
@@ -1648,6 +1734,8 @@ namespace GProject.Data.Migrations
 
             modelBuilder.Entity("GProject.Data.DomainClass.Category", b =>
                 {
+                    b.Navigation("Posts");
+
                     b.Navigation("Products");
                 });
 
@@ -1668,6 +1756,8 @@ namespace GProject.Data.Migrations
 
                     b.Navigation("Orders");
 
+                    b.Navigation("Reviews");
+
                     b.Navigation("ViewHistories");
                 });
 
@@ -1681,11 +1771,18 @@ namespace GProject.Data.Migrations
                     b.Navigation("Contacts");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("Posts");
                 });
 
             modelBuilder.Entity("GProject.Data.DomainClass.Order", b =>
                 {
                     b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("GProject.Data.DomainClass.Posts", b =>
+                {
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("GProject.Data.DomainClass.Product", b =>

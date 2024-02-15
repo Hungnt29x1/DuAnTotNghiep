@@ -10,7 +10,7 @@
     }
 
     .starFade {
-        background-image: url("/images/saotrang.jpg");
+        background-image: url("/images/saotrang1.png");
         width: 30px;
         height: 30px;
         display: inline-block;
@@ -18,14 +18,14 @@
     }
 
     .starFadeN {
-        background-image: url("/images/saotrang.jpg");
+        background-image: url("/images/saotrang1.png");
         width: 30px;
         height: 30px;
         display: inline-block;
     }
 
     .starGlow {
-        background-image: url("/images/sao_vang.jpg");
+        background-image: url("/images/sao_vang1.png");
         min-width: 30px;
         min-height: 30px;
         display: inline-block;
@@ -33,18 +33,15 @@
     }
 
     .starGlowN {
-        background-image: url("/images/sao_vang.jpg");
+        background-image: url("/images/sao_vang1.png");
         width: 30px;
         height: 30px;
         display: inline-block;
     }
 </style>
 <div class="dl-horizontal">
-    <dt>
-        Bình luận
-    </dt>
     <dd>
-        <div class="commentBox">
+        <div class="commentBox" style="margin-top:20px">
             @using (Html.BeginForm("Save", "Evaluate", FormMethod.Post, new { onsubmit = "return SubmitComment()" }))
             {
                 @Html.AntiForgeryToken();
@@ -57,11 +54,11 @@
                             @{
                                 if (string.IsNullOrEmpty(Model.Item7.Image))
                                 {
-                                    <img src="~/images/avatar.jpg" style="border-radius:50%; width:35px; border:2px solid black;">
+                                    <img src="~/images/avatar.jpg" style="border-radius:50%; width:35px; border:1px solid black;">
                                 }
                                 else
                                 {
-                                    <img src="~/images/@Model.Item7.Image" style="border-radius:50%; width:35px; border:2px solid black;">
+                                    <img src="~/images/@Model.Item7.Image" style="border-radius:50%; width:35px; border:1px solid black;">
                                 }
                             }
                         </div>

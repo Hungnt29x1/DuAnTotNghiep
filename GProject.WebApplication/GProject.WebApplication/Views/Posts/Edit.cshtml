@@ -1,0 +1,136 @@
+﻿@model GProject.Data.DomainClass.Posts
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+@section Styles{
+    <link href="~/Adminassets/summernote/summernote-bs4.css" rel="stylesheet" />
+    <link href="~/Adminassets/summernote/summernote.css" rel="stylesheet" />
+    <link href="~/Adminassets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css" rel="stylesheet">
+    <link href="~/Adminassets/css/app.min.css" rel="stylesheet">
+}
+
+<div class="page-header">
+    <div class="header-sub-title">
+        <nav class="breadcrumb breadcrumb-dash">
+            <a class="breadcrumb-item"><i class="anticon anticon-home m-r-5"></i>Trang chủ</a>
+            <span class="breadcrumb-item active">Sửa tin</span>
+        </nav>
+    </div>
+</div>
+
+<form asp-controller="Posts" asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="PostId" />
+    <input type="hidden" asp-for="Thumb" />
+    <input type="hidden" asp-for="CreatedDate" />
+    <input type="hidden" asp-for="Author" />
+
+    <div class="page-header no-gutters has-tab">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#product-edit-basic">THÔNG TIN TIN TỨC</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#product-edit-description">MÔ TẢ</a>
+            </li>
+        </ul>
+    </div>
+    <div class="tab-content m-t-15">
+        <div class="tab-pane fade show active" id="product-edit-basic">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="font-weight-semibold" for="productName">Tiêu Đề</label>
+                        <input type="text" class="form-control" asp-for="Title">
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-semibold" for="productName">SEO Ngắn</label>
+                        <input type="text" class="form-control" asp-for="Scontents">
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-semibold" for="productName">Danh Mục</label>
+                        <select class="form-control" style="height: 48px;" asp-for="CategoryId" asp-items="@ViewBag.CatId" required>
+                            <option label="DANH MUC"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-semibold" for="productBrand">Ảnh Đại Diện</label>
+                        <input name="fThumb" type="file" class="form-control-file" asp-for="Thumb" />
+                        <span asp-validation-for="Thumb" class="text-danger"></span>
+                    </div>
+                    <div class="row">
+                        <div class="form-group d-flex align-items-center">
+                            <div class="checkbox">
+                                <input asp-for="Published" type="checkbox" />
+                                <label for="Published">Hoạt Động</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group d-flex align-items-center">
+                            <div class="checkbox">
+                                <input asp-for="IsHot" type="checkbox" />
+                                <label for="IsHot">Tin Hot</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group d-flex align-items-center">
+                            <div class="checkbox">
+                                <input asp-for="IsNewfeed" type="checkbox" />
+                                <label for="IsNewfeed">Tin Mới</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="product-edit-description">
+            <div class="card">
+                <div class="card-body">
+                    <textarea class="summernote" asp-for="Contents"></textarea>
+                </div>
+            </div>
+            <div class="d-md-flex m-b-15 align-items-center justify-content-between">
+                <div class="m-b-15">
+                    <button class="btn btn-primary">
+                        <i class="anticon anticon-plus-circle"></i>
+                        <span>Sửa tin tức</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script src="~/Adminassets/js/vendors.min.js"></script>
+
+<!-- page js -->
+<script src="~/Adminassets/vendors/chartjs/Chart.min.js"></script>
+<script src="~/Adminassets/js/pages/dashboard-e-commerce.js"></script>
+
+<!-- Core JS -->
+<script src="~/Adminassets/js/app.min.js"></script>
+@section Scripts{
+    <script src="~/Adminassets/vendors/select2/select2.min.js"></script>
+    <script src="~/Adminassets/js/pages/e-commerce-product-edit.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.19.1/jquery.validate.min.js"></script>
+    <script src="~/Adminassets/summernote/summernote-bs4.js"></script>
+
+    <script>
+
+        jQuery(document).ready(function () {
+            $('.summernote').summernote({
+                fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New'],
+                styleTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5'],
+                height: 200,
+                minHeight: null,
+                maxHeight: null,
+                focus: true
+            });
+        });
+    </script>
+}

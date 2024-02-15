@@ -160,7 +160,6 @@
                             <tr>
                                 <th style="width: 35px;">STT</th>
                                 <th>Tên nhãn hiệu</th>
-                                <th>Lượt tìm kiếm</th>
                                 <th>Trạng thái</th>
                                 <th>Mô tả</th>
                                 <th></th>
@@ -176,9 +175,6 @@
                                         <td class="text-center">@i</td>
                                         <td>
                                             @item.Name
-                                        </td>
-                                        <td>
-                                            @item.SearchCount
                                         </td>
                                         <td>
                                             @(item.Status == 1 ? "Đang sử dụng" : "Không sử dụng")

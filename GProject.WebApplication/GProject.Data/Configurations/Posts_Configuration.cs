@@ -16,7 +16,8 @@ namespace GProject.Data.Configurations
             builder.ToTable("Posts");
             builder.HasKey(c => c.Id);
             builder.Property(e => e.Id).HasDefaultValueSql("(newid())");
-            builder.Property(e => e.Subject).HasMaxLength(100);
+            builder.HasOne(d => d.EmployeeId_Navigation).WithMany(p => p.Posts).HasForeignKey(d => d.EmployeeId);
+            builder.HasOne(d => d.CategoryId_Navigation).WithMany(p => p.Posts).HasForeignKey(d => d.CategoryId);
         }
     }
 }

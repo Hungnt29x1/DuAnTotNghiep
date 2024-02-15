@@ -128,5 +128,10 @@ namespace GProject.WebApplication.Controllers
                 return Json(null);
             }
         }
+
+        public IActionResult CreateAddress()
+        {
+            return View();
+        }
     }
 }

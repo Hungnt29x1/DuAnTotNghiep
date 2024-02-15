@@ -287,6 +287,83 @@ List<GProject.Data.DomainClass.ViewHistory>>
                 <div class="box-filters mt-0 pb-5 border-bottom">
                     <div class="row">
                         <!--Chỗ này để filter-->
+                        <form id="Searchform" name="searchForm" method="post" class="form-horizontal"
+                              action="/Product/index">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="text" id="prodName" name="prodName" value="@ViewData["prodName"]"
+                                               placeholder="Tên sản phẩm" class="form-control col-12" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        @Html.DropDownList("category", CategoryItems, new { @maxlength = "30", @class =
+                                        "searchText form-control col-12" })
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        @Html.DropDownList("brand", StoreItems, new { @maxlength = "30", @class =
+                                        "searchText form-control col-12" })
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        @{
+                                            decimal fPrice = decimal.Parse(Html.Encode(ViewData["fPrice"]));
+                                        }
+                                        @Html.DropDownList("fPrice",new[]
+                                        {
+                                        new SelectListItem{Text=" Giá từ ", Value="-1", Selected= (fPrice== -1)},
+                                        new SelectListItem{Text="0 VNĐ", Value="0", Selected= (fPrice== 0)},
+                                        new SelectListItem{Text="100.000 VNĐ", Value="100000", Selected= (fPrice==
+                                        100000)},
+                                        new SelectListItem{Text="200.000 VNĐ", Value="200000", Selected= (fPrice ==
+                                        200000)},
+                                        new SelectListItem{Text="500.000 VNĐ", Value="500000", Selected= (fPrice==
+                                        500000)},
+                                        new SelectListItem{Text="1.000.000 VNĐ", Value="1000000", Selected= (fPrice ==
+                                        1000000)}
+                                        }, new { @name = "sStatus", @class="searchText form-control select col-12"})
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        @{
+                                            int tPrice = int.Parse(Html.Encode(ViewData["tPrice"]));
+                                        }
+                                        @Html.DropDownList("tPrice",new[]
+                                        {
+                                        new SelectListItem{Text=" Giá đến ", Value="-1", Selected= (tPrice== -1)},
+                                        new SelectListItem{Text="0 VNĐ", Value="0", Selected= (tPrice== 0)},
+                                        new SelectListItem{Text="< 100.000 VNĐ", Value="100000", Selected= (tPrice==
+                                        100000)},
+                                        new SelectListItem{Text="< 200.000 VNĐ", Value="200000", Selected= (tPrice ==
+                                        200000)},
+                                        new SelectListItem{Text="< 500.000 VNĐ", Value="500000", Selected= (tPrice==
+                                        500000)},
+                                        new SelectListItem{Text="< 1.000.000 VNĐ", Value="1000000", Selected= (tPrice ==
+                                        1000000)},
+                                        new SelectListItem{Text="trên 1.000.000 VNĐ", Value="100000000", Selected= (tPrice
+                                        == 100000000)}
+                                        }, new { @name = "sStatus", @class="searchText form-control select col-12"})
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <button class="btn btn-primary"
+                                                onclick="$('.searchText').removeAttr('disabled')" type="submit">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                        <a class="btn btn-outline-info" asp-controller="Product" asp-action="Index"
+                                           asp-route-clear="clear">
+                                            <i class="fas fa-undo-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
 
                     </div>
                 </div>
@@ -302,7 +379,10 @@ List<GProject.Data.DomainClass.ViewHistory>>
                             <div class="card-grid-style-3 @getCategory.Id @getbrand.Id">
                                 <!---->
                                 <div class="card-grid-inner">
-                                    <div class="tools"><a class="btn btn-trend btn-tooltip mb-10" href="#" aria-label="Trend" data-bs-placement="left"></a><a class="btn btn-wishlist btn-tooltip mb-10" href="shop-wishlist.html" aria-label="Add To Wishlist"></a><a class="btn btn-compare btn-tooltip mb-10" href="shop-compare.html" aria-label="Compare"></a><a class="btn btn-quickview btn-tooltip" aria-label="Quick view" href="#ModalQuickview" data-bs-toggle="modal"></a></div>
+                                    <div class="tools">
+                                        <a class="btn btn-wishlist btn-tooltip mb-10" href="shop-wishlist.html" aria-label="Add To Wishlist"></a>
+                                        <a class="btn btn-quickview btn-tooltip" aria-label="Quick view" href="#ModalQuickview" data-bs-toggle="modal"></a>
+                                    </div>
                                     <div class="image-box">
                                         @if (existProdPromotion != null && existProdPromotion.Promotion.DiscountPercent == 1)
                                         {
@@ -325,8 +405,12 @@ List<GProject.Data.DomainClass.ViewHistory>>
                                         </a>
                                     </div>
                                     <div class="info-right">
-                                        <a class="font-xs color-gray-500" href="shop-vendor-single.html">@x.Brand.Name</a><br><a class="color-brand-3 font-sm-bold" href="shop-single-product-2.html">Samsung 36&quot; French door 28 cu. ft. Smart Energy Star </a>
-                                        <div class="rating"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><span class="font-xs color-gray-500">(65)</span></div>
+                                        <a class="font-xs color-gray-500">@x.Brand.Name</a>
+                                        <br>
+                                        <a class="color-brand-3 font-sm-bold" href="/productdetail/@x.Product.Id">
+                                            @x.Product.Name
+                                        </a>
+                                        <div class="rating"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"></div>
                                         <div class="price-info">
                                             @if (existProdPromotion == null)
                                             {
@@ -343,11 +427,43 @@ List<GProject.Data.DomainClass.ViewHistory>>
                                             }
 
                                         </div>
-                                        <div class="mt-20 box-btn-cart"><a class="btn btn-cart" href="shop-cart.html">Xem chi tiết</a></div>
+                                        <div class="mt-20 box-btn-cart"><a class="btn btn-cart" href="/productdetail/@x.Product.Id">Xem chi tiết</a></div>
                                         <ul class="list-features">
-                                            <li>27-inch (diagonal) Retina 5K display</li>
-                                            <li>3.1GHz 6-core 10th-generation Intel Core i5</li>
-                                            <li>AMD Radeon Pro 5300 graphics</li>
+                                            @{
+                                                if (@x.Product?.ProductType == "0")
+                                                {
+                                                    <li>Sản phẩm bình thường</li>
+                                                }
+                                                else if (@x.Product?.ProductType == "1")
+                                                {
+                                                    <li>Sản phẩm mới</li>
+                                                }
+                                                else if (@x.Product?.ProductType == "2")
+                                                {
+                                                    <li>Sản phẩm nổi bật</li>
+                                                }
+                                                else if (@x.Product?.ProductType == "3")
+                                                {
+                                                    <li>Sản phẩm được yêu thích</li>
+                                                }
+                                                else
+                                                {
+                                                    <li>Sản phẩm khuyến mại</li>
+                                                }
+                                            }
+                                            <li>Còn : @x.ProductVariations?.Sum(c =>c.QuantityInStock)</li>
+                                            @{
+                                                //if(x.Product.Description == null)
+                                                //{
+                                                //    <li>Phiên bản limited</li>
+                                                //}
+                                                //else
+                                                //{
+                                                //    <li>@x.Product.Description</li>
+                                                //}
+                                                <li>View : @x.Product.ViewCount</li>
+
+                                            }
                                         </ul>
                                     </div>
                                 </div>

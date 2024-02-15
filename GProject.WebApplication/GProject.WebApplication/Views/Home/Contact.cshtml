@@ -1,0 +1,180 @@
+﻿@model GProject.WebApplication.Models.ContactModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+
+@{
+    ViewBag.Title = "Phản hồi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="section-box">
+    <div class="breadcrumbs-div mb-0">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li><a class="font-xs color-gray-1000" href="/">Trang chủ</a></li>
+                <li><a class="font-xs color-gray-500">Phản hồi</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<section class="section-box shop-template mt-0">
+    <div class="container">
+        <div class="box-contact">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="contact-form">
+                        <h3 class="color-brand-3 mt-60">Phản hồi về chúng tôi</h3>
+                        <p class="font-sm color-gray-700 mb-30">Cửa hàng của chúng tôi rất mong nhận được phản hồi từ bạn!</p>
+                        <form id="contact-form" class="contact-form" method="post">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="form-group">
+                                        <input class="form-control" type="text" placeholder="Nhập họ tên..." id="FullName" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="form-group">
+                                        <input class="form-control" type="email" placeholder="Nhập email..." id="Email" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <input class="form-control" type="text" placeholder="Nhập tiêu đề..." id="Subject" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <textarea class="form-control" placeholder="Mô tả chi tiết..." rows="5" id="Description" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <input class="btn btn-buy w-auto" id="submit-button" type="submit" value="Gửi phản hồi">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="map">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d325467.51371614134!2d-73.98947743776016!3d40.72209526768085!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m3!3e0!4m0!4m0!5e0!3m2!1svi!2s!4v1664373110059!5m2!1svi!2s" height="550" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-contact-address pt-80 pb-50">
+            <div class="row">
+                <div class="col-lg-3 mb-30">
+                    <h3 class="mb-5">Visit our stores</h3>
+                    <p class="font-sm color-gray-700 mb-30">Find us at these locations</p><a class="btn btn-buy w-auto">View map</a>
+                </div>
+                <div class="col-lg-3">
+                    <div class="mb-30">
+                        <h4>Melbourne</h4>
+                        <p class="font-sm color-gray-700">205 North Michigan Avenue, Suite 810<br>Chicago, 60601, USA</p>
+                    </div>
+                    <div class="mb-30">
+                        <h4>San Francisco</h4>
+                        <p class="font-sm color-gray-700">205 North Michigan Avenue, Suite 810<br>Chicago, 60601, USA</p>
+                    </div>
+                    <div class="mb-30">
+                        <h4>Byron Bay</h4>
+                        <p class="font-sm color-gray-700">205 North Michigan Avenue, Suite 810<br>Chicago, 60601, USA</p>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="mb-30">
+                        <h4>Sydney</h4>
+                        <p class="font-sm color-gray-700">205 North Michigan Avenue, Suite 810<br>Chicago, 60601, USA</p>
+                    </div>
+                    <div class="mb-30">
+                        <h4>Sweden</h4>
+                        <p class="font-sm color-gray-700">205 North Michigan Avenue, Suite 810<br>Chicago, 60601, USA</p>
+                    </div>
+                    <div class="mb-30">
+                        <h4>Ha Noi</h4>
+                        <p class="font-sm color-gray-700">205 North Michigan Avenue, Suite 810<br>Chicago, 60601, USA</p>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="mb-30">
+                        <h4>Bangkok</h4>
+                        <p class="font-sm color-gray-700">205 North Michigan Avenue, Suite 810<br>Chicago, 60601, USA</p>
+                    </div>
+                    <div class="mb-30">
+                        <h4>Seoul</h4>
+                        <p class="font-sm color-gray-700">205 North Michigan Avenue, Suite 810<br>Chicago, 60601, USA</p>
+                    </div>
+                    <div class="mb-30">
+                        <h4>Paris</h4>
+                        <p class="font-sm color-gray-700">205 North Michigan Avenue, Suite 810<br>Chicago, 60601, USA</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="box-contact-support pt-80 pb-50 background-gray-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 mb-30 text-center text-lg-start">
+                    <h3 class="mb-5">We‘d love to here from you</h3>
+                    <p class="font-sm color-gray-700">Chat with our friendly team</p>
+                </div>
+                <div class="col-lg-3 text-center mb-30">
+                    <div class="box-image mb-20"><img src="assets/imgs/page/contact/chat.svg" alt="Ecom"></div>
+                    <h4 class="mb-5">Chat to sales</h4>
+                    <p class="font-sm color-gray-700 mb-5">Speak to our team.</p><a class="font-sm color-gray-900" href="mailto:sales@ecom.com">sales@ecom.com</a>
+                </div>
+                <div class="col-lg-3 text-center mb-30">
+                    <div class="box-image mb-20"><img src="assets/imgs/page/contact/call.svg" alt="Ecom"></div>
+                    <h4 class="mb-5">Call us</h4>
+                    <p class="font-sm color-gray-700 mb-5">Mon-Fri from 8am to 5pm</p><a class="font-sm color-gray-900" href="tel:+1(555)000-0000">+1(555)000-0000</a>
+                </div>
+                <div class="col-lg-3 text-center mb-30">
+                    <div class="box-image mb-20"><img src="assets/imgs/page/contact/map.svg" alt="Ecom"></div>
+                    <h4 class="mb-5">Visit us</h4>
+                    <p class="font-sm color-gray-700 mb-5">Visit our office</p><span class="font-sm color-gray-900">205 North Michigan Avenue, Suite 810<br>Chicago, 60601, USA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    $(document).ready(function () {
+        $("#submit-button").on("click", function () {
+            // Lấy dữ liệu từ các trường nhập liệu
+            var fullName = $("#FullName").val();
+            var email = $("#Email").val();
+            var subject = $("#Subject").val();
+            var description = $("#Description").val();
+
+            // Gửi dữ liệu lên máy chủ bằng AJAX
+            $.ajax({
+                url: "/contact.html", // Đường dẫn đến action trong controller
+                type: "POST",
+                data: {
+                    FullName: fullName,
+                    Email: email,
+                    Subject: subject,
+                    Description: description
+                },
+                success: function (result) {
+
+                    if (result.success) {
+                        swal("Thành công", "Đã gỡ sản phẩm khỏi giỏ hàng", "success");
+                        setTimeout(function () {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        alert("Có lỗi xảy ra khi gửi email.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Có lỗi xảy ra khi gửi email.");
+                }
+            });
+        });
+    });
+</script>

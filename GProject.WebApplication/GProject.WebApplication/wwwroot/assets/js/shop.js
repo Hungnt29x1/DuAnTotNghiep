@@ -97,7 +97,10 @@
         slidesToShow: 1,
         slidesToScroll: 1,
         arrows: false,
-        fade: false,
+        fade: true, slidesToShow: 1,
+        slidesToScroll: 1,
+        arrows: false,
+        fade: true,
         asNavFor: ".slider-nav-thumbnails"
     });
 

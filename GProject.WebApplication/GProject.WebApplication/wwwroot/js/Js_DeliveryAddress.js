@@ -39,47 +39,38 @@ function SaveDeliveryAddress() {
 
     }
     else {
-        swal("Bạn có muốn lưu thông tin địa chỉ này không?", {
-            title: 'Thông Báo!',
-            icon: 'info',
-            buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
-        }).then(function (isConfirm) {
-            if (isConfirm) {
-                $.ajax({
-                    url: "/DeliveryAddress/Save",
-                    type: "POST",
-                    data: JSON.stringify({
-                        id: $("#txtId").val(),
-                        provinceID: $("#selectProvince").val(),
-                        provinceName: $("[id='selectProvince'] option:selected").text(),
-                        districtID: $("#selectDistrict").val(),
-                        districtName: $("[id='selectDistrict'] option:selected").text(),
-                        wardCode: $("#selectWards").val(),
-                        wardName: $("[id='selectWards'] option:selected").text(),
-                        name: $("#ShippingFullName").val(),
-                        address: $("#ShippingAddress").val(),
-                        phoneNumber: $("#ShippingPhone").val(),
-                    }),
-                    contentType: "application/json; charset=utf-8;",
-                    dataType: 'json',
-                    success: function (result) {
-                        if (result) {
-                            swal("Thành công", "Lưu địa chỉ thành công", "success");
-                            LoadDataTable();
-                            ClearData();
-                            DataAddressCustomer();
-                            $('#formdata').hide();
-                            $("#changeform").text("Thêm mới");
-                        }
-                        else {
-                            swal("Không thành công", "Lưu địa chỉ thất bại, bạn cần kiểm tra lại thông tin", "error");
-                        }
-                    }
-                })
-            } else {
-                swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
+        $.ajax({
+            url: "/DeliveryAddress/Save",
+            type: "POST",
+            data: JSON.stringify({
+                id: $("#txtId").val(),
+                provinceID: $("#selectProvince").val(),
+                provinceName: $("[id='selectProvince'] option:selected").text(),
+                districtID: $("#selectDistrict").val(),
+                districtName: $("[id='selectDistrict'] option:selected").text(),
+                wardCode: $("#selectWards").val(),
+                wardName: $("[id='selectWards'] option:selected").text(),
+                name: $("#ShippingFullName").val(),
+                address: $("#ShippingAddress").val(),
+                phoneNumber: $("#ShippingPhone").val(),
+            }),
+            contentType: "application/json; charset=utf-8;",
+            dataType: 'json',
+            success: function (result) {
+                if (result) {
+                    swal("Thành công", "Lưu địa chỉ thành công", "success");
+                    location.reload(true)
+                    LoadDataTable();
+                    ClearData();
+                    DataAddressCustomer();
+                    $('#formdata').hide();
+                    $("#changeform").text("Thêm mới");
+                }
+                else {
+                    swal("Không thành công", "Lưu địa chỉ thất bại, bạn cần kiểm tra lại thông tin", "error");
+                }
             }
-        });
+        })
     }
 
 }
@@ -112,8 +103,7 @@ function DeleteDeliveryAddress(id) {
 
 }
 
-function SearchProduct()
-{
+function SearchProduct() {
     var _key = $("#Keyword_Layout").val()
     $.ajax({
         url: "/Product/Index?Keyword=" + _key,
@@ -258,7 +248,7 @@ function checkValidateVOucher() {
     if ($('#ShippingAddress').val() == '') {
         sweetAlert("Thông báo", "Thông tin địa chỉ không được để trống", "error");
         return false;
-    }    
+    }
     if (!validatePhoneNumber($('#ShippingPhone').val())) {
         sweetAlert("Thông báo", "Số điện thoại không đúng định dạng", "error");
         return false;

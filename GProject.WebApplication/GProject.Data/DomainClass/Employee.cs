@@ -33,5 +33,6 @@ namespace GProject.Data.DomainClass
         public string Image { get; set; }
         public List<Order>? Orders { get; set; }
         public List<Contact>? Contacts { get; set; }
+        public List<Posts>? Posts { get; set; }
     }
 }

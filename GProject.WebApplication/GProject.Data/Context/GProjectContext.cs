@@ -56,6 +56,8 @@ namespace GProject.Data.Context
         public DbSet<FavoriteProduct> FavoriteProducts { get; set; }
         public DbSet<DeliveryAddress>  DeliveryAddresses { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
+        public DbSet<Reviews> Reviews { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Configure using Fluent API
@@ -85,6 +87,8 @@ namespace GProject.Data.Context
             modelBuilder.ApplyConfiguration(new FavoriteProduct_Configuration());
             modelBuilder.ApplyConfiguration(new DeliveryAddress_Configuration());
             modelBuilder.ApplyConfiguration(new Voucher_Configuration());
+            modelBuilder.ApplyConfiguration(new Reviews_Configuration());
+
 
             modelBuilder.Entity<IdentityUserRole<string>>().HasNoKey();
             modelBuilder.Entity<IdentityUserLogin<string>>().HasNoKey();

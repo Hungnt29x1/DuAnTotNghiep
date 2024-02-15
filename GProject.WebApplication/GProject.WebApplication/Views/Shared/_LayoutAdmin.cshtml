@@ -37,6 +37,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyCKjLTXdq6Db3Xit_pW_GK4EXuPRtnod4o"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    @await RenderSectionAsync("Styles", required: false)
 
     <style>
         a {
@@ -57,7 +58,7 @@
          data-sidebar-position="absolute" data-header-position="absolute" data-boxed-layout="full" >
         <header class="topbar" data-navbarbg="skin5" style="background-color: #152d36;">
             <div class="logo_container d-flex">
-                <a href="/dashboard/index"><span style="color: white;">Dream</span><span>Fashions</span></a>
+                <a href="/dashboard/index" style="margin-left: 55px;"><span style="color: white;">FAS</span><span>FOX</span></a>
             </div>
             <nav class="navbar top-navbar navbar-expand-md navbar-dark">
                 <div class="navbar-collapse collapse" id="navbarSupportedContent" style="margin-top: -43px;" data-navbarbg="skin5">
@@ -122,7 +123,7 @@
                                 <span style=" color: white" class="hide-menu">Danh sách hóa đơn</span>
                             </a>
                         </li>
-                        @if (user.Position == GProject.Data.Enums.EmployeePosition.Manager)
+                        @if (user?.Position == GProject.Data.Enums.EmployeePosition.Manager)
                         {
                             <li class="sidebar-item pt-2">
                                 <a class="sidebar-link waves-effect waves-dark sidebar-link" href="/Promotion/Index"
@@ -135,7 +136,7 @@
                                 <a class="sidebar-link waves-effect waves-dark sidebar-link" href="/Voucher/Index"
                                aria-expanded="false">
                                     <i class="fas fa-tags" style="color: white"></i>
-                                    <span style=" color: white" class="hide-menu">Mã khuyến mại</span>
+                                    <span style=" color: white" class="hide-menu">Voucher</span>
                                 </a>
                             </li>
                             <li class="sidebar-item dropdown">
@@ -185,14 +186,21 @@
                             <a class="sidebar-link waves-effect waves-dark sidebar-link" href="/Brand/Index"
                                aria-expanded="false">
                                 <i class="fab fa-bandcamp" style="color: white"></i>
-                                <span style=" color: white" class="hide-menu">Nhãn hiệu</span>
+                                <span style=" color: white" class="hide-menu">Thương hiệu</span>
                             </a>
-                        </li>                        
+                        </li> 
+                        <li class="sidebar-item dropdown">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link" href="/Posts/Index"
+                               aria-expanded="false">
+                                <i class="fas fa-blog" style="color: white"></i>
+                                <span style=" color: white" class="hide-menu">Tin tức</span>
+                            </a>
+                        </li>
                         <li class="sidebar-item dropdown">
                             <a class="sidebar-link waves-effect waves-dark sidebar-link" href="/Evaluate/index"
                                aria-expanded="false">
                                 <i class="fas fa-comment-dots" style="color: white"></i>
-                                <span style=" color: white" class="hide-menu">Bình luận đánh giá</span>
+                                <span style=" color: white" class="hide-menu">Đánh giá</span>
                             </a>
                         </li>                                                
                     </ul>
@@ -239,6 +247,7 @@
     <script src="/AdminContent/plugins/bower_components/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
     <script src="/AdminContent/js/pages/dashboards/dashboard1.js"></script>
     <script src="~/js/js_deliveryaddress.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts",required:false)
 </body>
 
 </html>

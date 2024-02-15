@@ -15,5 +15,6 @@ namespace GProject.Data.DomainClass
         public int Status { get; set; }  // 0: sử dụng || 1: không sử dụng
         public string? Description { get; set; }
         public List<Product>? Products { get; set; }
+        public List<Posts>? Posts { get; set; }
     }
 }

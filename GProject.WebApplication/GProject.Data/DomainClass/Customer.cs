@@ -34,5 +34,6 @@ namespace GProject.Data.DomainClass
         public List<ViewHistory>? ViewHistories { get; set; }
         public List<FavoriteProduct>? FavoriteProducts { get; set; }
         public List<Evaluate>? Evaluates { get; set; }
+        public List<Reviews>? Reviews { get; set; }
     }
 }

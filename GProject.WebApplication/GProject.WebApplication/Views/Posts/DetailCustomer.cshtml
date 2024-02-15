@@ -1,0 +1,295 @@
+﻿@model GProject.Data.DomainClass.Posts
+
+
+@{
+    ViewBag.Title = "Tin tức";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    List<GProject.Data.DomainClass.Category> dataCats = ViewBag.CatName;
+    List<GProject.Data.DomainClass.Employee> dataUsers = ViewBag.NameAuthor;
+    List<GProject.Data.DomainClass.Reviews> lsReviews = ViewBag.Review;
+
+    var category = dataCats.FirstOrDefault(c => c.Id == Model.CategoryId);
+    var usercheck = dataUsers.FirstOrDefault(c => c.Id == Model.EmployeeId);
+
+    var user = GProject.WebApplication.Helpers.Commons.GetObjectFromJson<GProject.Data.DomainClass.Customer>(Context.Session, "userLogin");
+
+}
+
+
+<div class="section-box">
+    <div class="breadcrumbs-div">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li><a class="font-xs color-gray-1000" href="index.html">Trang Chủ</a></li>
+                <li><a class="font-xs color-gray-500" href="blog.html">Tin tức : @Model.Title</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<section class="section-box shop-template mt-10">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="row">
+                    <div class="col-lg-12 mb-50 display-list">
+                        <a class="tag-dot font-xs" href="#">@category?.Name</a>
+                        <h3 class="mt-15 mb-25">@Model.Title</h3>
+                        <div class="box-author mb-5">
+                            <div class="img-author mr-30"><img src="~/images/@usercheck?.Image" alt="Ecom"><span class="font-md-bold">By @usercheck?.Name</span></div><span class="datepost color-gray-500 font-sm mr-30">@Model.UpdatedDate?.ToString("dd/MM/yyyy")</span><span class="timeread color-gray-500 font-sm">Lượt xem: @Model.Views</span>
+                        </div>
+                        <div class="image-feature"><img src="~/images/news/@Model.Thumb" alt="Ecom"></div>
+                        <div class="content-text">
+                            @Html.Raw(Model.Contents)
+                        </div>
+                        <div class="border-bottom-4 mb-20"></div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="box-tags"><a class="btn btn-tags mr-10 hover-up">Technology</a><a class="btn btn-tags mr-10 hover-up">Devices</a><a class="btn btn-tags mr-10 hover-up">AI</a></div>
+                            </div>
+                            <div class="col-lg-6 text-end">
+                                <div class="d-inline-block pt-5 pb-5">
+                                    <div class="share-link"><span class="font-md-bold color-brand-3 mr-15">Share</span><a class="facebook hover-up" href="#"> </a><a class="printest hover-up" href="#"></a><a class="twitter hover-up" href="#"></a><a class="instagram hover-up" href="#"></a></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-bottom-4 mt-20 mb-30"></div>
+                        <h5 class="font-md-bold mb-30">Bình luận</h5>
+                        <div class="form-comment">
+                            <form id="reviewForm">
+                                <input type="hidden" id="PostId" value="@Model.Id" />
+                                <input type="hidden" id="UserId" value="@user?.Id" />
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <textarea class="form-control" id="Comment" placeholder="Nhập bình luận..." rows="5"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <button id="add_review" class="btn btn-buy w-auto" type="submit">Gửi</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <h5 class="font-md-bold mb-30 mt-20">Comments</h5>
+                        <div class="comment-box mb-60">
+                            <form id="listReview">
+                                @if (lsReviews != null)
+                                {
+                                    foreach (var item in lsReviews)
+                                    {
+                                        <div class="comment-item comment-item-small" style="border: 1px solid #e9e9e9;padding: 10px;">
+                                            <div class="top-comment">
+                                                <div class="image-author"> <img src="~/images/@item.CustomerId_Navigation?.Image" alt="Ecom"></div>
+                                                <div class="author-name"> <span class="font-md-bold color-gray-900 mr-20">@item.CustomerId_Navigation?.Name</span><span class="font-sm color-gray-500">@item.CreateDate?.ToString("dd/MM/yyyy")</span></div>
+                                            </div>
+                                            <div class="comment-content font-md">
+                                                @item.Comment
+                                                
+                                            </div>
+                                            @if (item.AccountID == user?.Id)
+                                            {
+                                                <button id="ReviewId" class="btn btn-link" style="margin-left: 915px;color: red;" value="@item.Id" type="submit">Xóa</button>
+                                            }
+                                        </div>
+                                        
+                                    }
+                                }
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="sidebar-ads">
+                    <div class="bg-electronic">
+                        <span class="big-deal mb-5">Big deal</span>
+                        <h4 class="font-25">Electronic</h4>
+                        <p class="font-16 color-brand-3">Hot devices, Latest trending</p>
+                    </div>
+                </div>
+                <div class="box-slider-item mb-30">
+                    <div class="head pb-15 border-brand-2">
+                        <h5 class="color-gray-900">Trending News</h5>
+                    </div>
+                    <div class="content-slider">
+                        <div class="box-swiper slide-shop">
+                            <div class="swiper-container swiper-best-seller">
+                                <div class="swiper-wrapper pt-5">
+                                    <div class="swiper-slide">
+                                        <div class="card-grid-style-2 card-none-border mb-30 pb-5 mh-auto">
+                                            <div class="image-box mw-84"><a href="blog-single.html"><img src="~/assets/imgs/page/blog/blog-1.jpg" alt="Ecom"></a></div>
+                                            <div class="info-right">
+                                                <a class="color-brand-3 font-sm" href="blog-single.html">The latest technologies to be used for VR in 2022</a>
+                                                <div class="row mt-5">
+                                                    <div class="col-12"><span class="color-gray-500 font-xs mr-20">August 30, 2022</span><span class="color-gray-500 font-xs">3<span class="color-gray-500 font-xs">Mins read</span></span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-grid-style-2 card-none-border mb-30 pb-5 mh-auto">
+                                            <div class="image-box mw-84"><a href="blog-single.html"><img src="~/assets/imgs/page/blog/blog-2.jpg" alt="Ecom"></a></div>
+                                            <div class="info-right">
+                                                <a class="color-brand-3 font-sm" href="blog-single.html">The fate of Elon Musks deal to buy Twitter</a>
+                                                <div class="row mt-5">
+                                                    <div class="col-12"><span class="color-gray-500 font-xs mr-20">August 30, 2022</span><span class="color-gray-500 font-xs">4<span class="color-gray-500 font-xs">Mins read</span></span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-grid-style-2 card-none-border mb-30 pb-5 mh-auto">
+                                            <div class="image-box mw-84"><a href="blog-single.html"><img src="~/assets/imgs/page/blog/blog-3.jpg" alt="Ecom"></a></div>
+                                            <div class="info-right">
+                                                <a class="color-brand-3 font-sm" href="blog-single.html">Binance blockchain hit by $570 million crypto</a>
+                                                <div class="row mt-5">
+                                                    <div class="col-12"><span class="color-gray-500 font-xs mr-20">August 30, 2022</span><span class="color-gray-500 font-xs">5<span class="color-gray-500 font-xs">Mins read</span></span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-grid-style-2 card-none-border mb-30 pb-5 mh-auto">
+                                            <div class="image-box mw-84"><a href="blog-single.html"><img src="~/assets/imgs/page/blog/blog-4.jpg" alt="Ecom"></a></div>
+                                            <div class="info-right">
+                                                <a class="color-brand-3 font-sm" href="blog-single.html">The Twitter-Musk trial is now on pause</a>
+                                                <div class="row mt-5">
+                                                    <div class="col-12"><span class="color-gray-500 font-xs mr-20">August 30, 2022</span><span class="color-gray-500 font-xs">6<span class="color-gray-500 font-xs">Mins read</span></span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="swiper-slide">
+                                        <div class="card-grid-style-2 card-none-border mb-30 pb-5 mh-auto">
+                                            <div class="image-box mw-84"><a href="blog-single.html"><img src="~/assets/imgs/page/blog/blog-5.jpg" alt="Ecom"></a></div>
+                                            <div class="info-right">
+                                                <a class="color-brand-3 font-sm" href="blog-single.html">Apple unveils iPhone 14 at far out event</a>
+                                                <div class="row mt-5">
+                                                    <div class="col-12"><span class="color-gray-500 font-xs mr-20">August 30, 2022</span><span class="color-gray-500 font-xs">3<span class="color-gray-500 font-xs">Mins read</span></span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-grid-style-2 card-none-border mb-30 pb-5 mh-auto">
+                                            <div class="image-box mw-84"><a href="blog-single.html"><img src="~/assets/imgs/page/blog/blog-6.jpg" alt="Ecom"></a></div>
+                                            <div class="info-right">
+                                                <a class="color-brand-3 font-sm" href="blog-single.html">Walmart enters the metaverse with Roblox</a>
+                                                <div class="row mt-5">
+                                                    <div class="col-12"><span class="color-gray-500 font-xs mr-20">August 30, 2022</span><span class="color-gray-500 font-xs">4<span class="color-gray-500 font-xs">Mins read</span></span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-grid-style-2 card-none-border mb-30 pb-5 mh-auto">
+                                            <div class="image-box mw-84"><a href="blog-single.html"><img src="~/assets/imgs/page/blog/blog-7.jpg" alt="Ecom"></a></div>
+                                            <div class="info-right">
+                                                <a class="color-brand-3 font-sm" href="blog-single.html">Take no prisoners: In the Feds inflation fight</a>
+                                                <div class="row mt-5">
+                                                    <div class="col-12"><span class="color-gray-500 font-xs mr-20">August 30, 2022</span><span class="color-gray-500 font-xs">5<span class="color-gray-500 font-xs">Mins read</span></span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-grid-style-2 card-none-border mb-30 pb-5 mh-auto">
+                                            <div class="image-box mw-84"><a href="blog-single.html"><img src="~/assets/imgs/page/blog/blog-8.jpg" alt="Ecom"></a></div>
+                                            <div class="info-right">
+                                                <a class="color-brand-3 font-sm" href="blog-single.html">Who is who: Meet the Murdoch Family</a>
+                                                <div class="row mt-5">
+                                                    <div class="col-12"><span class="color-gray-500 font-xs mr-20">August 30, 2022</span><span class="color-gray-500 font-xs">6<span class="color-gray-500 font-xs">Mins read</span></span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-button-next swiper-button-next-style-2 swiper-button-next-bestseller"></div>
+                            <div class="swiper-button-prev swiper-button-prev-style-2 swiper-button-prev-bestseller"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-slider-item">
+                    <div class="head pb-15 border-brand-2">
+                        <h5 class="color-gray-900">Popular Tags</h5>
+                    </div>
+                    <div class="content-slider mb-50"><a class="btn btn-border mr-5" href="blog.html">Games</a><a class="btn btn-border mr-5" href="blog.html">Electronics</a><a class="btn btn-border mr-5" href="blog.html">Video</a><a class="btn btn-border mr-5" href="blog.html">Cellphone</a><a class="btn btn-border mr-5" href="blog.html">Indoor</a><a class="btn btn-border mr-5" href="blog.html">VGA Card</a><a class="btn btn-border mr-5" href="blog.html">USB</a><a class="btn btn-border mr-5" href="blog.html">Lightning</a><a class="btn btn-border mr-5" href="blog.html">Camera</a><a class="btn btn-border" href="blog.html">Window</a><a class="btn btn-border mr-5" href="blog.html">Air Vent</a><a class="btn btn-border mr-5" href="blog.html">Bedroom</a><a class="btn btn-border mr-5" href="blog.html">Laptop</a><a class="btn btn-border mr-5" href="blog.html">Dashboard</a><a class="btn btn-border mr-5" href="blog.html">Keyboard</a></div>
+                </div>
+                <div class="banner-right h-500 text-center mb-30">
+                    <span class="text-no font-11">No.9</span>
+                    <h5 class="font-23 mt-20">Sensitive Touch<br class="d-none d-lg-block">without fingerprint</h5>
+                    <p class="text-desc font-16 mt-15">Smooth handle and accurate click</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script src="~/js/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#reviewForm").submit(function (e) {
+            e.preventDefault(); // Ngăn chặn sự kiện mặc định của form
+
+            // Gọi hàm để thực hiện AJAX
+            addReview();
+        });
+    });
+    function addReview() {
+        var postId = $("#PostId").val();
+        var userId = $("#UserId").val();
+        var comment = $("#Comment").val();
+
+        $.ajax({
+            type: "POST",
+            url: "/Review/Create", // Thay "ControllerName" bằng tên thực tế của controller của bạn
+            data: JSON.stringify({ PostId: postId, AccountID: userId, Comment: comment }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // Xử lý kết quả từ server nếu cần
+                console.log(response);
+                if (response.result == 1) {
+                    swal("Thành công", "Bình luận thành công", "success");
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                } else if (response.result == 0) {
+                    swal("Thông báo!", "Vui lòng đăng nhập để bình luận", "error");
+                } else {
+                    swal("Thông báo!", "Vui lòng bình luận không để trống!", "error");
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $("#listReview").submit(function (e) {
+            e.preventDefault(); // Ngăn chặn sự kiện mặc định của form
+
+            // Gọi hàm để thực hiện AJAX
+            deleteReview();
+        });
+    });
+    function deleteReview(){
+        var reviewId = $("#ReviewId").val();
+        console.log(reviewId)
+        $.ajax({
+            type:"POST",
+            url: "/Review/Delete",
+            data: { id: reviewId },
+            dataType: "json",
+            success:function(response){
+                console.log(response);
+                if (response.result == 1) {
+                    swal("Thành công", "Xóa thành công", "success");
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                } else if (response.result == 0) {
+                    swal("Lỗi!", "Vui lòng đăng nhập để xóa", "error");
+                } else {
+                    swal("Lỗi!", "Vui lòng kiểm tra lại!", "error");
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+</script>

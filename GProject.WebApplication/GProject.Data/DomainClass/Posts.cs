@@ -10,14 +10,24 @@ namespace GProject.Data.DomainClass
     public class Posts
     {
         public Guid? Id { get; set; }
-        public string Subject { get; set; }
-        public string Message { get; set; }
-        public PostType PostType { get; set; }
-        public DateTime CreateDate { get; set; }
-        public DateTime UpdateDate { get; set; }
-        public string CreateBy { get; set; }
-        public string Image { get; set; }
-        public int Status { get; set; } // 0: không sử dụng || 1: sử dụng
-        public string? Description { get; set; }
+        public int PostId { get; set; }
+        public string Title { get; set; }
+        public string Scontents { get; set; }
+        public string Contents { get; set; }
+        public string Thumb { get; set; }
+        public bool Published { get; set; }
+        public string Alias { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        public string Author { get; set; }
+        public Guid? EmployeeId { get; set; }
+        public Guid? CategoryId { get; set; }
+        public bool IsHot { get; set; }
+        public bool IsNewfeed { get; set; }
+        public int? Views { get; set; }
+
+        public Category? CategoryId_Navigation { get; set; }
+        public Employee? EmployeeId_Navigation { get; set; }
+        public List<Reviews>? Reviews { get; set; }
     }
 }

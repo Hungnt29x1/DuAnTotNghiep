@@ -20,6 +20,7 @@ GProject.Data.DomainClass.Brand, EvaluateCommentDTO, decimal, int, Customer>
     var totalRating = decimal.Parse(rating.ToString());
 
     var lstColor = await Commons.GetAll<Color>(String.Concat(Commons.mylocalhost, "Color/get-all-Color"));
+    var lstBrand = await Commons.GetAll<Brand>(String.Concat(Commons.mylocalhost, "Color/get-all-Brand"));
     var lstSize = await Commons.GetAll<Size>(String.Concat(Commons.mylocalhost, "Size/get-all-Size"));
     var lstCustomer = await Commons.GetAll<Customer>(String.Concat(Commons.mylocalhost, "Customer/get-all-Customer"));
     var lstOrder = await Commons.GetAll<Order>(String.Concat(Commons.mylocalhost, "Order/get-all-Order"));
@@ -72,308 +73,406 @@ GProject.Data.DomainClass.Brand, EvaluateCommentDTO, decimal, int, Customer>
 
 
 
-<link rel="stylesheet" type="text/css" href="/UserContent/styles/categories_styles.css">
+@*<link rel="stylesheet" type="text/css" href="/UserContent/styles/categories_styles.css">
 <link href="/css/product_details.css" rel="stylesheet">
-<link href="/AdminContent/css/style.min.css" rel="stylesheet">
+<link href="/AdminContent/css/style.min.css" rel="stylesheet">*@
+<style>
 
-
-<div style="margin-top: 200px;">
-
-    @if (@ViewData["Mess"] != null)
-    {
-        <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+    .commentBox {
+        background-color: #efefef;
+        padding: 10px;
+        border-radius: 10px;
     }
-    @if (@ViewData["message"] != null)
-    {
-        <p style="visibility: hidden;" id="messerror">@ViewData["message"]</p>
-    }
-    @if (Model != null)
-    {
-        <div id="motor-detail" class="container">
-            <div class="row overview">
-                <div class="col-12 col-lg-7 overview-left container-fliud">
-                    <div class="characteristics-image text-center">
-                        @{
-                            string img = Model.Item2.Where(c => c.ProductId == Model.Item1.Id).Select(c =>
-                            c.Image).FirstOrDefault();
-                        }
-                        <img id="imgProd" style="width:650px;height:500px;" src="~/images/@img" alt="">
-                    </div>
-                    <div class="row">
-                        <fieldset>
 
-                            <hr>
-                            @{
-                                foreach (var item in Model.Item2.Select(c => c.ColorId).Distinct().ToList())
-                                {
-                                    string im = Model.Item2.Where(c => c.ColorId == item && c.ProductId == Model.Item1.Id).Select(c =>
-                                    c.Image).FirstOrDefault().NullToString();
-                                    <button type="button" onclick="changeImageProd('@im')">
-                                        <img style="width:130px; height:160px;"
-                                             class="img-thumbnail" src="~/images/@im" alt="">
-                                    </button>
-                                }
-                            }
-                        </fieldset>
+    .starFade {
+        background-image: url("/images/saotrang1.png");
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .starFadeN {
+        background-image: url("/images/saotrang1.png");
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+    }
+
+    .starGlow {
+        background-image: url("/images/sao_vang1.png");
+        min-width: 30px;
+        min-height: 30px;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .starGlowN {
+        background-image: url("/images/sao_vang1.png");
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+    }
+</style>
+
+
+
+
+<section class="section-box shop-template">
+    <div class="container">
+        @if (@ViewData["Mess"] != null)
+        {
+            <p style="visibility: hidden;" id="error">@ViewData["Mess"]</p>
+        }
+        @if (@ViewData["message"] != null)
+        {
+            <p style="visibility: hidden;" id="messerror">@ViewData["message"]</p>
+        }
+        @if (Model != null)
+        {
+            <form id="formdata">
+                <input id="cTotalMoney" name="cTotalMoney" hidden="hidden" />
+                <input id="cColor" name="cColor" hidden="hidden" />
+                <input id="cSize" name="cSize" hidden="hidden" />
+                <input id="cQuantity" name="cQuantity" hidden="hidden" />
+                <input id="cPrice" name="cPrice" hidden="hidden" />
+                <input id="cProductId" name="cProductId" value="@Model.Item1.Id.ToString()" hidden="hidden" />
+                <div class="section-box">
+                    <div class="breadcrumbs-div">
+                        <div class="container">
+                            <ul class="breadcrumb">
+                                <li><a class="font-xs color-gray-1000" href="/">Trang chủ</a></li>
+                                <li><a class="font-xs color-gray-500">Chi tiết : @Model.Item1.Name</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <div class="col-12 col-lg-5 overview-right">
-                    <form id="formdata" class="form-horizontal d-block">
-                        <input id="cTotalMoney" name="cTotalMoney" hidden="hidden" />
-                        <input id="cColor" name="cColor" hidden="hidden" />
-                        <input id="cSize" name="cSize" hidden="hidden" />
-                        <input id="cQuantity" name="cQuantity" hidden="hidden" />
-                        <input id="cPrice" name="cPrice" hidden="hidden" />
-                        <input id="cProductId" name="cProductId" value="@Model.Item1.Id.ToString()" hidden="hidden" />
-
-                        <h2 class="d-none d-lg-block" style="color:Black">@Model.Item1.Name</h2>
-
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="color-brand-3 mb-5 mw-80">@Model.Item1.Name</h3>
                         <div class="row">
-                            <h3 class="d-none d-lg-block" style="color:Red">
-                                Giá hiện tại: @string.Format("{0:0,0}", price) đ
-                                @if (existProdPromotion != null)
-                                {
-                                    <del style="    color: gray; font-size: 18px;">@string.Format("{0:0,0}", existProdPromotion.PromotionDetail.InitialPrice) đ </del>
-                                }
-                            </h3>
-
+                            <div class="col-xl-6 col-lg-7 col-md-8 col-sm-7 text-center text-sm-start mb-mobile">
+                                <span class="bytext color-gray-500 font-xs font-medium">by</span><a class="byAUthor color-gray-900 font-xs font-medium" href="shop-vendor-single.html"> Xuân Trường</a>
+                                <div class="rating mt-5 d-inline-block mr-20"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><img src="~/assets/imgs/template/icons/star.svg" alt="Ecom"><span class="font-xs color-gray-500 font-medium"> (@Model.Item1.ViewCount Views)</span></div>
+                                <div class="sku-product d-inline-block"><span class="font-sm color-brand-3 font-medium">SKU:</span><span class="font-sm color-gray-500"> EcomTech13689</span></div>
+                            </div>
+                            <div class="col-xl-6 col-lg-5 col-md-4 col-sm-5 text-center text-sm-end">
+                                <div class="d-inline-block">
+                                    <a class="mr-20" href="shop-wishlist.html"><span class="btn btn-wishlist mr-5 opacity-100 transform-none"></span><span class="font-md color-gray-900">Add to Wish list</span></a><a href="shop-compare.html"><span class="btn btn-compare mr-5 opacity-100 transform-none"></span><span class="font-md color-gray-900">Add to Compare</span></a>
+                                    <div class="d-inline-block align-middle ml-50">
+                                        <div class="share-link"><span class="font-md-bold color-brand-3 mr-15 d-none d-lg-inline-block">Share</span><a class="facebook hover-up" href="#"></a><a class="printest hover-up" href="#"></a><a class="twitter hover-up" href="#"></a><a class="instagram hover-up" href="#"></a></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="overview-detail mb-3" style="min-height: 0">
-                            <div class="characteristics-desc">
-                                <h4>Nhãn hiệu: @Model.Item3.Name</h4>
-                                @{
-                                    string productType = "";
-                                    foreach (var item in Model.Item1.ProductType.Split(',').Distinct().ToList())
-                                    {
-                                        switch (item)
-                                        {
-                                            case "0":
-                                                productType += "Sản phẩm bình thường";
-                                                break;
-                                            case "1":
-                                                productType += "Sản phẩm mới";
-                                                break;
-                                            case "2":
-                                                productType += "Sản phẩm nổi bật";
-                                                break;
-                                            case "3":
-                                                productType += "Sản phẩm được yêu thích";
-                                                break;
-                                            case "4":
-                                                productType += "Sản phẩm khuyến mại";
-                                                break;
-                                            default:
-                                                break;
+                        <div class="border-bottom pt-10 mb-20"></div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="gallery-image">
+                            <div class="galleries">
+                                <div class="detail-gallery">
+                                    @*<label class="label">-17%</label>*@
+                                    <div class="product-image-slider">
+                                        @{
+                                            //string img = Model.Item2.Where(c => c.ProductId == Model.Item1.Id).Select(c =>
+                                            //c.Image).FirstOrDefault();
+
+                                            foreach (var item in Model.Item2.Select(c => c.ColorId).Distinct().ToList())
+                                            {
+                                                string im = Model.Item2.Where(c => c.ColorId == item && c.ProductId == Model.Item1.Id).Select(c => c.Image).FirstOrDefault().NullToString();
+                                                <figure class="border-radius-10"><img id="imgProd" src="~/images/@im" alt="product image"></figure>
+                                            }
+
                                         }
-                                    }
-                                }
-                                <h4>Loại sản phẩm: @productType</h4>
-                                <h4>Lượt xem: @Model.Item1.ViewCount <i class="fa fa-eye"></i></h4>
-
-                                <h4>
-                                    Số lượng còn lại:
-                                    <span id="mQuantityInstock" value="">
-                                        @Model.Item2.Sum(c => c.QuantityInStock)
-
-                                    </span>
-                                </h4>
-                                <h4 class="cl-class">
-                                    Màu sắc:
+                                        @*<figure class="border-radius-10"><img id="imgProd" src="~/images/@img" alt="product image"></figure>*@
+                                        @*<figure class="border-radius-10"><img id="imgProd7" src="https://picsum.photos/200/300" alt="product image"></figure>*@
+                                    </div>
+                                </div>
+                                <div class="slider-nav-thumbnails">
                                     @{
                                         foreach (var item in Model.Item2.Select(c => c.ColorId).Distinct().ToList())
                                         {
                                             string im = Model.Item2.Where(c => c.ColorId == item && c.ProductId == Model.Item1.Id).Select(c => c.Image).FirstOrDefault().NullToString();
-
-                                            var dataColor = lstColor.Where(x => x.Status == 1 && x.Id == item).FirstOrDefault();
-
-                                            @if (dataColor != null)
-                                            {
-                                                <button type="button" value="@item" id="btnColor" onclick="changeImageProd('@im')" style="padding: 0 5px 0 5px;" href="/productdetail/@item/@Model.Item1.Id">
-                                                    @(dataColor.Name.NullToString())
-                                                </button>
-                                            }
-                                        }
-                                    }
-                                </h4>
-                                <h4 class="si-class">
-                                    Size:
-                                    @{
-                                        foreach (var item in Model.Item2.Select(c => c.SizeId).Distinct().ToList())
-                                        {
-                                            var dataSize = lstSize.Where(x => x.Status == 1 && x.Id == item).FirstOrDefault();
-                                            var dataProductVariationSize = lstProductvariation.Where(x => x.ProductId == idproduct && x.SizeId == item && x.QuantityInStock > 0).FirstOrDefault();
-                                            @if (dataSize != null && dataProductVariationSize != null)
-                                            {
-                                                <button type="button" value="@item" id="btnSize" style="padding: 0 9px 0 9px;">
-                                                    @(dataSize.Code.NullToString())
-                                                </button>
-                                            }
-
-                                        }
-                                    }
-                                </h4>
-
-                                <div class="input-group plus-minus-input row">
-                                    <h4 class="col-md-4">Số lượng:</h4>
-                                    <div class="col-md-8 justify-content-center">
-                                        <div class="row">
-                                            <div class="input-group-button col-md-3 mt-2">
-                                                <button type="button" class="btn-warning hollow circle" data-quantity="minus"
-                                                        data-field="quantity" style="margin-right:5px;">
-                                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                                </button>
+                                            <div onclick="changeImageProd('@im')">
+                                                <div class="item-thumb"><img src="~/images/@im" id="imgProd" alt="product image"></div>
                                             </div>
-                                            <input class="input-group-field form-control col-md-5 quantity" type="number" id="quantity"
-                                                   name="quantity" value="0" style="width:100px;">
-                                            <div class="input-group-button col-md-3 mt-2">
-                                                <button type="button" class="btn-info hollow circle" data-quantity="plus"
-                                                        data-field="quantity" style="margin-left:5px;">
-                                                    <i class="fa fa-plus" aria-hidden="true"></i>
-                                                </button>
+                                        }
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-tags mt-15 mb-30">
+                            <div class="d-inline-block mr-25"><span class="font-sm font-medium color-gray-900">Category:</span><a class="link" href="#">Smartphones</a></div>
+                            <div class="d-inline-block"><span class="font-sm font-medium color-gray-900">Tags:</span><a class="link" href="#">Blue</a>,<a class="link" href="#">Smartphone</a></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="row">
+                            <!--add form-->
+                            <div class="col-lg-7 col-md-7 mb-30">
+                                <div class="box-product-price">
+                                    <h3 class="color-brand-3 price-main d-inline-block mr-10">@string.Format("{0:0,0}", price) đ</h3>
+                                    @if (existProdPromotion != null)
+                                    {
+                                        <span class="color-gray-500 price-line font-xl line-througt">@string.Format("{0:0,0}", existProdPromotion.PromotionDetail.InitialPrice) đ</span>
+                                    }
+                                </div>
+                                <div class="box-progress-product mt-15 mb-20">
+                                    <div class="progress mb-5">
+                                        <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="product-description color-gray-900 mb-30">
+                                    <ul class="list-dot">
+                                        @{
+                                            foreach (var item in Model.Item1.ProductType.Split(',').Distinct().ToList())
+                                            {
+                                                switch (item)
+                                                {
+                                                    case "0":
+                                                        <li>Sản phẩm bình thường</li>
+                                                        break;
+                                                    case "1":
+                                                        <li>Sản phẩm mới</li>
+                                                        break;
+                                                    case "2":
+                                                        <li>Sản phẩm nổi bật</li>
+                                                        break;
+                                                    case "3":
+                                                        <li>Sản phẩm được yêu thích</li>
+                                                        break;
+                                                    case "4":
+                                                        <li>Sản phẩm khuyến mại</li>
+                                                        break;
+                                                    default:
+                                                        break;
+                                                }
+                                            }
+                                        }
+                                        <li>Thương hiệu: @Model.Item3.Name</li>
+                                        <li>Còn: <a id="mQuantityInstock">@Model.Item2.Sum(c => c.QuantityInStock)</a> Sản phẩm</li>
+                                        <li>Cung cấp bởi Công Ty Xuân Trường.</li>
+                                    </ul>
+                                </div>
+                                <div class="box-product-style-size mt-30">
+                                    <div class="row">
+                                        <div class="col-lg-12 mb-20">
+                                            <p class="font-sm color-gray-900">Màu sắc:</p>
+                                            <ul class="list-styles">
+                                                @{
+                                                    foreach (var item in Model.Item2.Select(c => c.ColorId).Distinct().ToList())
+                                                    {
+                                                        string im = Model.Item2.Where(c => c.ColorId == item && c.ProductId == Model.Item1.Id).Select(c => c.Image).FirstOrDefault().NullToString();
+
+                                                        var dataColor = lstColor.Where(x => x.Status == 1 && x.Id == item).FirstOrDefault();
+
+                                                        @if (dataColor != null)
+                                                        {
+                                                            <li value="@item" id="btnColor" onclick="changeImageProd('@im')" href="/productdetail/@item/@Model.Item1.Id" style="background-color: rgb(255 255 255);">@(dataColor.Name.NullToString())</li>
+                                                        }
+                                                    }
+                                                }
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-lg-12 mb-10">
+                                            <p class="font-sm color-gray-900">
+                                                Kích cỡ:
+                                                <ul class="list-sizes">
+                                                    @{
+                                                        foreach (var item in Model.Item2.Select(c => c.SizeId).Distinct().ToList())
+                                                        {
+                                                            var dataSize = lstSize.Where(x => x.Status == 1 && x.Id == item).FirstOrDefault();
+                                                            var dataProductVariationSize = lstProductvariation.Where(x => x.ProductId == idproduct && x.SizeId == item && x.QuantityInStock > 0).FirstOrDefault();
+                                                            @if (dataSize != null && dataProductVariationSize != null)
+                                                            {
+                                                                <li class="btn" value="@item" id="btnSize">@(dataSize.Code.NullToString())</li>
+                                                            }
+
+                                                        }
+                                                    }
+                                                </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="buy-product mt-25">
+                                    <div class="font-sm text-quantity mb-10">Số lượng:</div>
+                                    <div class="box-quantity">
+                                        <div class="input-quantity">
+                                            <input class="font-xl color-brand-3 quantity" type="number" id="quantity" name="quantity" value="0">
+                                        </div>
+                                        <div class="button-buy button-buy-full"><a class="btn btn-buy" onclick="AddToCart()">Thêm vào giỏ</a></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-5 col-md-5">
+                                <div class="pl-30 pl-mb-0">
+                                    <div class="box-featured-product">
+                                        <div class="item-featured">
+                                            <div class="featured-icon"><img src="~/assets/imgs/page/product/delivery.svg" alt="Ecom"></div>
+                                            <div class="featured-info">
+                                                <span class="font-sm-bold color-gray-1000">Free Delivery</span>
+                                                <p class="font-sm color-gray-500 font-medium">From all orders over $10</p>
                                             </div>
                                         </div>
-
+                                        <div class="item-featured">
+                                            <div class="featured-icon"><img src="~/assets/imgs/page/product/support.svg" alt="Ecom"></div>
+                                            <div class="featured-info">
+                                                <span class="font-sm-bold color-gray-1000">Support 24/7</span>
+                                                <p class="font-sm color-gray-500 font-medium">Shop with an expert</p>
+                                            </div>
+                                        </div>
+                                        <div class="item-featured">
+                                            <div class="featured-icon"><img src="~/assets/imgs/page/product/return.svg" alt="Ecom"></div>
+                                            <div class="featured-info">
+                                                <span class="font-sm-bold color-gray-1000">Return & Refund</span>
+                                                <p class="font-sm color-gray-500 font-medium">Free return over $200</p>
+                                            </div>
+                                        </div>
+                                        <div class="item-featured">
+                                            <div class="featured-icon"><img src="~/assets/imgs/page/product/payment.svg" alt="Ecom"></div>
+                                            <div class="featured-info">
+                                                <span class="font-sm-bold color-gray-1000">Secure payment</span>
+                                                <p class="font-sm color-gray-500 font-medium">100% Protected</p>
+                                            </div>
+                                        </div>
                                     </div>
-
-                                </div>
-                                <hr>
-                                <div class="row">
-                                    <h3 class="col-4">Thành tiền:</h3>
-                                    <h3 class="col-8" style="color:red;" id="totalMoney" name="totalMoney"> 0 đ</h3>
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label col-sm-3">Mô tả của bạn:</label>
-                                    <div class="col-sm-12">
-                                        <textarea class="form-control" name="cDescription" id="cDescription" cols="50" rows="5"
-                                                  style="border:double 4px orange;"></textarea>
+                                    <div class="box-sidebar-product">
+                                        <div class="banner-right h-500 text-center mb-30 banner-right-product">
+                                            <span class="text-no font-11">No.9</span>
+                                            <h5 class="font-md-bold mt-10">Sensitive Touch<br class="d-none d-lg-block">without fingerprint</h5>
+                                            <p class="text-desc font-xs mt-10">Smooth handle and accurate click</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <button type="button" id="btnAction" onclick="AddToCart()" class="btn btn-outline-danger col-md-5">
-                                <i class="fa fa-shopping-cart" style="margin-right:10px; font-size: 17px;"></i>Thêm vào giỏ hàng
-                            </button>
-                            <button type="button" id="btnAction" onclick="BuyNow()" class="btn btn-outline-danger col-md-5">
-                                <i class="fa fa-calendar-o" style="margin-right:10px; font-size: 17px;"></i>Mua ngay
-                            </button>
-                        </div>
-
-                    </form>
-
-                </div>
-            </div>
-            <br>
-            <p>@Model.Item1.Description.NullToString()</p>
-            <!-- Danh sách sản phẩm liên quan-->
-            <div>
-                @{
-                    var lstSimilarProduct = lstProducts.Where(c => c.ProductType.Contains(Model.Item1.ProductType) && c.Id !=
-                    Model.Item1.Id).ToList();
-                }
-                @if (lstSimilarProduct.Count() > 0)
-                {
-                    <hr>
-                    <div class="p-1 text-center">
-                        <h2>Sản phẩm liên quan</h2>
                     </div>
-                    <div class="product-grid" style="height:450px;">
-                        @foreach (var x in lstSimilarProduct)
+                </div>
+                <div class="border-bottom pt-20 mb-40"></div>
+            </form>
+        }
+    </div>
+</section>
+<section class="section-box shop-template">
+    <div class="container">
+        <div class="pt-30 mb-10">
+            <ul class="nav nav-tabs nav-tabs-product" role="tablist">
+                <li><a class="active" href="#tab-description" data-bs-toggle="tab" role="tab" aria-controls="tab-description" aria-selected="true">Mô tả</a></li>
+                <li><a href="#tab-vendor" data-bs-toggle="tab" role="tab" aria-controls="tab-vendor" aria-selected="true">Đánh giá</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade active show" id="tab-description" role="tabpanel" aria-labelledby="tab-description">
+                    <div class="display-text-short">
+                        @if(@Model.Item1.Description != null)
                         {
-                            <div class="product-item men">
-                                <div class="product discount product_filter">
-                                    <div class="image">
+                            <p>@Model.Item1.Description</p>
+                        }
+                        else
+                        {
+                            <p>It is a paradisematic country, in which roasted parts of sentences fly into your mouth. Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar. The Big Oxmox advised her not to do so, because there were thousands of bad Commas, wild Question Marks and devious Semikoli, but the Little Blind Text didn’t listen. She packed her seven versalia, put her initial into the belt and made herself on the way.</p>
+                            <p>When she reached the first hills of the Italic Mountains, she had a last view back on the skyline of her hometown Bookmarksgrove, the headline of Alphabet Village and the subline of her own road, the Line Lane. Pityful a rethoric question ran over her cheek, then she continued her way. On her way she met a copy. The copy warned the Little Blind Text, that where it came from it would have been rewritten a thousand times and everything that was left from its origin would be the word “and” and the Little Blind Text should turn around and return to its own, safe country. It is a paradisematic country, in which roasted parts of sentences fly into your mouth. Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.</p>
+                            <p><img src="~/assets/imgs/page/product/product-banner.jpg" alt="Ecom"></p>
+                            <p>It is a paradisematic country, in which roasted parts of sentences fly into your mouth. Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar. The Big Oxmox advised her not to do so, because there were thousands of bad Commas, wild Question Marks and devious Semikoli, but the Little Blind Text didn’t listen. She packed her seven versalia, put her initial into the belt and made herself on the way.</p>
+                            <p><img src="~/assets/imgs/page/product/product-banner-2.jpg" alt="Ecom"></p>
+                            <p>When she reached the first hills of the Italic Mountains, she had a last view back on the skyline of her hometown Bookmarksgrove, the headline of Alphabet Village and the subline of her own road, the Line Lane. Pityful a rethoric question ran over her cheek, then she continued her way. On her way she met a copy. The copy warned the Little Blind Text, that where it came from it would have been rewritten a thousand times and everything that was left from its origin would be the word “and” and the Little Blind Text should turn around and return to its own, safe country.</p>
 
-                                        @{
-                                            string image = lstProductvariation.Where(c => c.ProductId == x.Id &&
-                                            !string.IsNullOrEmpty(c.Image)).Select(c => c.Image).FirstOrDefault().NullToString();
+                        }
+                    </div>
+                    <div class="mt-20 text-center"><a class="btn btn-border font-sm-bold pl-80 pr-80 btn-expand-more">More Details</a></div>
+                </div>
+                <div class="tab-pane fade" id="tab-vendor" role="tabpanel" aria-labelledby="tab-vendor">
+                    @if (Model.Item4.Evaluates.Count() > 0)
+                    {
+                        @foreach (var item in Model.Item4.Evaluates)
+                        {
+                            var cusInfo = lstCustomer.Where(c => c.Id == item.CustomerId).FirstOrDefault();
+                            <hr />
+                            <div class="row">
+                                <div class="col-md-1 d-flex justify-content-between">
+                                    @{
+                                        string imgCusAvata = cusInfo.Image.NullToString();
+                                        if (string.IsNullOrEmpty(imgCusAvata))
+                                        {
+                                            <img src="~/images/avatar.jpg" style="border-radius:50%; width:35px; border:2px solid black;">
                                         }
-                                        <img class="image__img" src="~/images/@image" alt="Bricks">
-                                        <div class="image__overlay image__overlay--primary">
-                                            <p class="image__description">Mua ngay</p>
-                                            <a class="btn btn-primary" href="/productdetail/@x.Id" style="border-radius:10px;">
-                                                <i class="fa fa-shopping-cart" style="margin-right:10px;"></i>Thêm vào giỏ hàng
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <h4 class="card-title text-center" style="color:red;">
-                                            @string.Format("{0:0,0} VNĐ",Convert.ToDouble(x.Price.ToString()))
-                                        </h4>
-                                        <div>
-                                            <h4 class="card-title text-center">@x.Name</h4>
-                                        </div>
-                                    </div>
+                                        else
+                                        {
+                                            <img src="~/images/@imgCusAvata" style="border-radius:50%; width:35px; border:2px solid black;">
+                                        }
+                                    }
+                                </div>
+                                <div class="col-md-11">
+                                    <i style="margin-right: 30px; vertical-align: top;">@cusInfo.Name.NullToString()</i>
+                                    <i style="margin-right: 30px; vertical-align: top;">@item.CreateDate.ToString("dd/MM/yyyy")</i>
+                                    @for (int i = 0; i < item.Rating; i++)
+                                    {
+                                        <span class="starGlowN"></span>
+                                    }
+                                    @for (int i = item.Rating.NullToInt(); i < 5; i++)
+                                    {
+                                        <span class="starFadeN"></span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-11">
+                                    @Html.Raw(item.Comment.Replace("\n", "<br />"))
                                 </div>
                             </div>
                         }
-                    </div>
-                }
-            </div>
-            <!-- Bình luận, đánh giá-->
-            <div class="p-1 text-left" style="background-color: #CCCCCC; margin-top: 30px;">
-                <h4><i class="fa fa-comments" style="margin:5px 10px;"></i>Đánh giá sản phẩm</h4>
-                <h6><i class="fa fa-comments" style="margin:5px 10px;"></i>Có @lstEvaluates.Where(c => c.ProductId == Model.Item1.Id).Count() lượt đánh giá</h6>
-            </div>
-            <div>
-                <span class="starFadeN" id="sRate1"></span>
-                <span class="starFadeN" id="sRate2"></span>
-                <span class="starFadeN" id="sRate3"></span>
-                <span class="starFadeN" id="sRate4"></span>
-                <span class="starFadeN" id="sRate5"></span>
-            </div>
-            @if (Model.Item4.Evaluates.Count() > 0)
-            {
-                @foreach (var item in Model.Item4.Evaluates)
-                {
-                    var cusInfo = lstCustomer.Where(c => c.Id == item.CustomerId).FirstOrDefault();
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-1 d-flex justify-content-between">
-                            @{
-                                string imgCusAvata = cusInfo.Image.NullToString();
-                                if (string.IsNullOrEmpty(imgCusAvata))
-                                {
-                                    <img src="~/images/avatar.jpg" style="border-radius:50%; width:35px; border:2px solid black;">
-                                }
-                                else
-                                {
-                                    <img src="~/images/@imgCusAvata" style="border-radius:50%; width:35px; border:2px solid black;">
-                                }
-                            }
-                        </div>
-                        <div class="col-md-11">
-                            <i style="margin-right: 30px; vertical-align: top;">@cusInfo.Name.NullToString()</i>
-                            <i style="margin-right: 30px; vertical-align: top;">@item.CreateDate</i>
-                            @for (int i = 0; i < item.Rating; i++)
+                    }
+                    @if (isOrder != null && isComment == null)
+                    {
+                        <partial id="commentBox" name="_CommentBox" style="margin-top:10px" />
+                    }
+                </div>
+                <div class="border-bottom pt-30 mb-50"></div>
+                <h4 class="color-brand-3">Sản phẩm tương tự</h4>
+                <div class="list-products-5 mt-20">
+                    <!--Sản phẩm tương tự-->
+                    @{
+                        var lstSimilarProduct = lstProducts.Where(c => c.ProductType.Contains(Model.Item1.ProductType) && c.Id !=
+                        Model.Item1.Id).ToList();
+                        @if (lstSimilarProduct.Count() > 0)
+                        {
+                            @foreach (var x in lstSimilarProduct.Take(5))
                             {
-                                <span class="starGlowN"></span>
+                                string image = lstProductvariation.Where(c => c.ProductId == x.Id &&
+                                !string.IsNullOrEmpty(c.Image)).Select(c => c.Image).FirstOrDefault().NullToString();
+                                var FindBrandName = lstBrand.Where(c => c.Id == x.BrandId).FirstOrDefault();
+                                var a = FindBrandName?.Name;
+                                <div class="card-grid-style-3">
+                                    <div class="card-grid-inner">
+                                        <div class="tools"><a class="btn btn-trend btn-tooltip mb-10" href="#" aria-label="Trend" data-bs-placement="left"></a><a class="btn btn-wishlist btn-tooltip mb-10" href="shop-wishlist.html" aria-label="Add To Wishlist"></a><a class="btn btn-compare btn-tooltip mb-10" href="shop-compare.html" aria-label="Compare"></a><a class="btn btn-quickview btn-tooltip" aria-label="Quick view" href="#ModalQuickview" data-bs-toggle="modal"></a></div>
+                                        <div class="image-box"><span class="label bg-brand-2">-17%</span><a href="/productdetail/@x.Id"><img src="~/images/@image" alt="Ecom"></a></div>
+                                        <div class="info-right">
+                                            <a class="font-xs color-gray-500" href="/productdetail/@x.Id">@a</a><br><a class="color-brand-3 font-sm-bold" href="shop-single-product-2.html">@x.Name</a>
+                                            <div class="rating"><span class="font-xs color-gray-500">Lượt xem: @x.ViewCount</span></div>
+                                            <div class="price-info"><strong class="font-lg-bold color-brand-3 price-main">@string.Format("{0:0,0} VNĐ",Convert.ToDouble(x.Price.ToString()))</strong></div>
+                                            <div class="mt-20 box-btn-cart"><a class="btn btn-cart" href="/productdetail/@x.Id">Xem chi tiết</a></div>
+                                        </div>
+                                    </div>
+                                </div>
                             }
-                            @for (int i = item.Rating.NullToInt(); i < 5; i++)
-                            {
-                                <span class="starFadeN"></span>
-                            }
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-11">
-                            @Html.Raw(item.Comment.Replace("\n", "<br />"))
-                        </div>
-                    </div>
-                }
-            }
-            <hr />
-            @if (isOrder != null && isComment == null)
-            {
-                <partial id="commentBox" name="_CommentBox" />
-            }
-
+                        }
+                    }
+                </div>
+                <div class="border-bottom pt-20 mb-40"></div>
+            </div>
         </div>
-    }
+    </div>
+</section>
 
 
 
+
+
+
+
+<div style="margin-top: 200px;">
     <div class="modal" id="OrderModal" role="dialog">
         <div class="modal-dialog modal-md" style="text-align:left; background-color:white; max-width:900px">
             <div style="width:900px;">
@@ -608,216 +707,110 @@ GProject.Data.DomainClass.Brand, EvaluateCommentDTO, decimal, int, Customer>
             </div>
         </div>
     </div>
+</div>
 
-    <script type="text/javascript">
-        $(document).ready(function () {
+<script type="text/javascript">
+    $(document).ready(function () {
 
-            LoadProvince();
-            LoadDistrict();
+        LoadProvince();
+        LoadDistrict();
+        var id = $(this).attr("order_id")
+        if (id == "buyFormData") {
+            DataAddressCustomer();
+        }
+        LoadWard();
+
+
+        document.querySelector('#@nameByNow').addEventListener('submit', function (e) {
+            var form = this;
+            e.preventDefault();
             var id = $(this).attr("order_id")
             if (id == "buyFormData") {
-                DataAddressCustomer();
+                if ($('#selectDeliveryAddress').val() == '') {
+                    sweetAlert("Thông báo", "Thông tin địa chỉ không được để trống", "error");
+                }
+                else {
+                    swal("Bạn chắc chắn muốn đặt đơn hàng này?", {
+                        title: 'Bạn chắc chắn muốn đặt đơn hàng này?',
+                        icon: 'info',
+                        buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
+                    }).then(function (isConfirm) {
+                        if (isConfirm) {
+                            form.submit();
+                        } else {
+                            swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
+                        }
+                    });
+                }
             }
-            LoadWard();
+            else if (id == "buyFormDataNotLogin") {
+
+                $('#Province').val($("#selectProvince :selected").text());
+                $('#District').val($("#selectDistrict :selected").text());
+                $('#Wards').val($("#selectWards :selected").text());
+
+                if (checkOrderData()) {
+                    swal("Bạn chắc chắn muốn đặt đơn hàng này?", {
+                        title: 'Bạn chắc chắn muốn đặt đơn hàng này?',
+                        icon: 'info',
+                        buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
+                    }).then(function (isConfirm) {
+                        if (isConfirm) {
+                            form.submit();
+                        } else {
+                            swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
+                        }
+                    });
+                }
+
+            }
+
+        });
 
 
-            document.querySelector('#@nameByNow').addEventListener('submit', function (e) {
-                var form = this;
-                e.preventDefault();
-                var id = $(this).attr("order_id")
-                if (id == "buyFormData") {
-                    if ($('#selectDeliveryAddress').val() == '') {
-                        sweetAlert("Thông báo", "Thông tin địa chỉ không được để trống", "error");
+        $("#selectDeliveryAddress").change(function () {
+            let _id = $("#selectDeliveryAddress").val();
+            $.ajax({
+                url: "/Product/GetDataDeliveryAddress?id=" + _id,
+                type: "GET",
+                success: function (result) {
+                    if (result != null) {
+                        ShippingFee(result.districtID, result.wardCode)
+                        $("#idDeliveryAddress").val(result.id)
                     }
                     else {
-                        swal("Bạn chắc chắn muốn đặt đơn hàng này?", {
-                            title: 'Bạn chắc chắn muốn đặt đơn hàng này?',
-                            icon: 'info',
-                            buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
-                        }).then(function (isConfirm) {
-                            if (isConfirm) {
-                                form.submit();
-                            } else {
-                                swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
-                            }
-                        });
-                    }
-                }
-                else if (id == "buyFormDataNotLogin") {
-
-                    $('#Province').val($("#selectProvince :selected").text());
-                    $('#District').val($("#selectDistrict :selected").text());
-                    $('#Wards').val($("#selectWards :selected").text());
-
-                    if (checkOrderData()) {
-                        swal("Bạn chắc chắn muốn đặt đơn hàng này?", {
-                            title: 'Bạn chắc chắn muốn đặt đơn hàng này?',
-                            icon: 'info',
-                            buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
-                        }).then(function (isConfirm) {
-                            if (isConfirm) {
-                                form.submit();
-                            } else {
-                                swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
-                            }
-                        });
-                    }
-
-                }
-
-            });
-
-
-            $("#selectDeliveryAddress").change(function () {
-                let _id = $("#selectDeliveryAddress").val();
-                $.ajax({
-                    url: "/Product/GetDataDeliveryAddress?id=" + _id,
-                    type: "GET",
-                    success: function (result) {
-                        if (result != null) {
-                            ShippingFee(result.districtID, result.wardCode)
-                            $("#idDeliveryAddress").val(result.id)
-                        }
-                        else {
-                            var total = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, '')) - parseFloat(document.querySelector('#txtGiamGia').innerText.replace(/\./g, ''))
-                            if (total < 0) {
-                                total = 0;
-                            }
-                            swal("Thông báo!", "Bạn không được để trống thông tin địa chỉ!", "error");
-                            $("#txtPhiShip").text(commasThousands(0))
-                            $('#textTotalMoney').text(commasThousands(total));
-                            $('#pTotalMoney').val(total);
-                            $('#cShippingFee').val(0);
-                        }
-                    }
-                })
-            });
-
-            $("#selectWards").change(function () {
-                let district = $("#selectDistrict").val();
-                let ward = $("#selectWards").val();
-                ShippingFee(district, ward)
-            })
-
-            $('input.quantity').keyup(function () {
-                let regex = /^[0-9]+$/;
-                if (!regex.test($(this).val()))
-                    $(this).val($(this).val().replace(/[^0-9.]/g, ""));
-            });
-
-
-            $("#selectVoucher").change(function () {
-                $("#DiscountCode").val('')
-                let _id = $("#selectVoucher").val();
-                $.ajax({
-                    url: "/Product/GetVoucher?id=" + _id,
-                    type: "GET",
-                    success: function (result) {
-                        let totalProduct = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, ''));
-                        let discount = 0;
-                        var total = 0;
-                        if (result != null) {
-                            if (result.discountForm == "%") {
-                                discount = Math.round(TinhPhanTram(totalProduct, result.discountRate))
-                                if (discount > result.maximumDiscount)
-                                    discount = result.maximumDiscount
-                            }
-                            else {
-                                discount = result.discountRate
-                            }
-                            $("#txtGiamGia").text(commasThousands(discount))
-                            total = totalProduct - discount + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/\./g, ''));
-
-                            swal("Áp dụng thành công mã giảm giá: " + result.name, "Bạn được giảm: " + commasThousands(discount) + " đ", "success");
-                        }
-                        else {
-                            swal("Thông báo!", "Mã giảm giá không được áp dụng!", "error");
-                            $("#txtGiamGia").text(0)
-                            $("#txtDiscountForm").text("đ")
-                            total = totalProduct + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/\./g, ''));
-                        }
-
+                        var total = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, '')) - parseFloat(document.querySelector('#txtGiamGia').innerText.replace(/\./g, ''))
                         if (total < 0) {
                             total = 0;
                         }
-
-
+                        swal("Thông báo!", "Bạn không được để trống thông tin địa chỉ!", "error");
+                        $("#txtPhiShip").text(commasThousands(0))
                         $('#textTotalMoney').text(commasThousands(total));
                         $('#pTotalMoney').val(total);
-                        $('#cGiamGia').val(discount);
+                        $('#cShippingFee').val(0);
                     }
-                })
-            });
-
-
-
-            $('[data-quantity="plus"]').click(function (e) {
-                e.preventDefault();
-                fieldName = $(this).attr('data-field');
-                var currentVal = parseInt($('input[name=' + fieldName + ']').val());
-                if (!isNaN(currentVal)) {
-                    $('input[name=' + fieldName + ']').val(currentVal + 1);
-                } else {
-                    $('input[name=' + fieldName + ']').val(0);
                 }
-                sumTotal();
-            });
-            $('[data-quantity="minus"]').click(function (e) {
-                e.preventDefault();
-                fieldName = $(this).attr('data-field');
-                var currentVal = parseInt($('input[name=' + fieldName + ']').val());
-                if (!isNaN(currentVal) && currentVal > 0) {
-                    $('input[name=' + fieldName + ']').val(currentVal - 1);
-                } else {
-                    $('input[name=' + fieldName + ']').val(0);
-                }
-                sumTotal();
-            });
-
-            $(".quantity").change(function () {
-                sumTotal();
-            });
-
-            $('.cl-class > button').click(function () {
-                $('.cl-class > button').css('background-color', 'white');
-                $(this).css('background-color', '#00CCCC');
-                $('#cColor').val($(this).val());
-                getQuantityInstock();
-            });
-
-            $('.si-class > button').click(function () {
-                $('.si-class > button').css('background-color', 'white');
-                $(this).css('background-color', '#00CCCC');
-                $('#cSize').val($(this).val());
-                getQuantityInstock();
-            });
-
-            var er = document.getElementById('error')
-            if (er != null) {
-                if ($('#error').text() == 'Failed')
-                    swal("Không thành công", "Thao tác thất bại, vui lòng thực hiện lại", "error");
-                else
-                    swal("Thành công", "Thao tác thành công", "success");
-            }
-
-            var messerror = document.getElementById('messerror')
-            if (messerror != null) {
-                swal("Không thành công", messerror, "error");
-            }
+            })
         });
 
-        function checkphone() {
+        $("#selectWards").change(function () {
+            let district = $("#selectDistrict").val();
+            let ward = $("#selectWards").val();
+            ShippingFee(district, ward)
+        })
+
+        $('input.quantity').keyup(function () {
             let regex = /^[0-9]+$/;
-            if (!regex.test($("#ShippingPhone").val()))
-                $("#ShippingPhone").val($("#ShippingPhone").val().replace(/[^0-9.]/g, ""));
-        }
+            if (!regex.test($(this).val()))
+                $(this).val($(this).val().replace(/[^0-9.]/g, ""));
+        });
 
-        function CheckDiscountCode() {
-            $("#selectVoucher").val(0)
 
-            let _discountCode = $("#DiscountCode").val();
+        $("#selectVoucher").change(function () {
+            $("#DiscountCode").val('')
+            let _id = $("#selectVoucher").val();
             $.ajax({
-                url: "/Product/GetVoucher?discountCode=" + _discountCode,
+                url: "/Product/GetVoucher?id=" + _id,
                 type: "GET",
                 success: function (result) {
                     let totalProduct = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, ''));
@@ -835,7 +828,7 @@ GProject.Data.DomainClass.Brand, EvaluateCommentDTO, decimal, int, Customer>
                         $("#txtGiamGia").text(commasThousands(discount))
                         total = totalProduct - discount + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/\./g, ''));
 
-                        swal("Áp dụng thành công mã giảm giá: " + _discountCode, "Bạn được giảm: " + commasThousands(discount) + " đ ", "success");
+                        swal("Áp dụng thành công mã giảm giá: " + result.name, "Bạn được giảm: " + commasThousands(discount) + " đ", "success");
                     }
                     else {
                         swal("Thông báo!", "Mã giảm giá không được áp dụng!", "error");
@@ -854,300 +847,412 @@ GProject.Data.DomainClass.Brand, EvaluateCommentDTO, decimal, int, Customer>
                     $('#cGiamGia').val(discount);
                 }
             })
-        }
-
-        function TinhPhanTram(tongtien, giamgia) {
-            let thanhtien = tongtien - (tongtien * ((100 - giamgia) / 100))
-            return thanhtien
-        }
-
-        function ConvertDate(time) {
-            var date = new Date(time);
-            var dateConvert = (((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '/' + ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '/' + date.getFullYear())
-            return dateConvert
-        }
-
-        function OpenDeliveryAddress() {
-            $('#OrderModal').modal('hide');
-        }
-        e.preventDefault();
+        });
 
 
-        function ShippingFee(district_id, ward_code) {
-            $.ajax({
-                url: "/Product/ShippingFee?district_id=" + district_id + "&ward_code=" + ward_code,
-                type: "GET",
-                success: function (result) {
-                    var total = 0;
-                    var total = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, '')) + result - parseFloat(document.querySelector('#txtGiamGia').innerText.replace(/\./g, ''));
-                    if (total < 0) {
-                        total = 0;
-                    }
-                    $("#txtPhiShip").text(commasThousands(result))
-                    $('#textTotalMoney').text(commasThousands(total));
-                    $('#pTotalMoney').val(total);
-                    $('#cShippingFee').val(result);
-                }
-            })
-        }
 
-        function GetDataVoucherById(totalMoneyOrder) {
-            $.ajax({
-                url: "/Product/GetVoucher?totalMoneyOrder=" + totalMoneyOrder,
-                type: "GET",
-                success: function (result) {
-                    var renderData = "<option></option>";
-                    $.each(result, function (value) {
-                        var date = result[value].expirationDate;
-                        renderData += '<option value="' + result[value].id + '">' + result[value].name + '</option>';
-                        renderData += '<option disabled style = "font-style:italic" > (Đơn Tối Thiểu ' + commasThousands(result[value].minimumOrder) + 'đ)' + '</option>'
-
-                        if (result[value].discountForm == "%")
-                            renderData += '<option disabled style = "font-style:italic" > (Giảm tối đa ' + commasThousands(result[value].maximumDiscount) + 'đ)' + '</option>'
-
-                        renderData += '<option disabled style = "font-style:italic" > (HSD: ' + ConvertDate(date) + ')' + ' </option>'
-                        renderData += '<option disabled style="font-style:italic"></option>'
-                    });
-                    $("#selectVoucher").html(renderData)
-                }
-            })
-        }
-
-        function GetDataVoucher(totalMoneyOrder) {
-            $.ajax({
-                url: "/Product/GetVoucher?totalMoneyOrder=" + totalMoneyOrder,
-                type: "GET",
-                success: function (result) {
-                    var renderData = "<option></option>";
-                    $.each(result, function (value) {
-
-                        var date = result[value].expirationDate;
-                        renderData += '<option value="' + result[value].id + '">' + result[value].name + '</option>';
-                        renderData += '<option disabled style = "font-style:italic" > (Đơn Tối Thiểu ' + commasThousands(result[value].minimumOrder) + 'đ)' + '</option>'
-
-                        if (result[value].discountForm == "%")
-                            renderData += '<option disabled style = "font-style:italic" > (Giảm tối đa ' + commasThousands(result[value].maximumDiscount) + 'đ)' + '</option>'
-
-                        renderData += '<option disabled style = "font-style:italic" > (HSD: ' + ConvertDate(date) + ')' + ' </option>'
-                        renderData += '<option disabled style="font-style:italic"></option>'
-                    });
-                    $("#selectVoucher").html(renderData)
-                }
-            })
-        }
-
-        function getQuantityInstock() {
-            $.ajax({
-                data: {
-                    cColorId: $('#cColor').val(),
-                    cSizeId: $('#cSize').val(),
-                    cProductId: $('#cProductId').val()
-                },
-                contentType: 'application/json',
-                dataType: 'json',
-                url: '/Product/GetQuantityInstock',
-                type: 'GET',
-                success: function (result) {
-                    $('#mQuantityInstock').text(result);
-                }
-            });
-        }
-
-        function sumTotal() {
-            let mQuantity = parseInt($('#quantity').val().replace(/\./g, '') || 0) || 0;
-            let mPrice = parseFloat(@price) || 0;
-            $('#cQuantity').val(mQuantity);
-            $('#cPrice').val(mPrice);
-            $('#cTotalMoney').val(mQuantity * mPrice);
-            $('#pTotalMoney').val(mQuantity * mPrice);
-            $('#totalMoney').text(commasThousands(mQuantity * mPrice) + ' đ');
-            $('#txtTotalProduct').text(commasThousands($('#pTotalMoney').val()));
-        }
-
-        function commasThousands(nStr) {
-            nStr += '';
-            nStr = nStr.replace(/\./g, '');
-            x = nStr.split('.');
-            x1 = x[0];
-            x2 = x.length > 1 ? '.' + x[1] : '';
-            var rgx = /(\d+)(\d{3})/;
-            while (rgx.test(x1)) {
-                x1 = x1.replace(rgx, '$1' + '.' + '$2');
+        $('[data-quantity="plus"]').click(function (e) {
+            e.preventDefault();
+            fieldName = $(this).attr('data-field');
+            var currentVal = parseInt($('input[name=' + fieldName + ']').val());
+            if (!isNaN(currentVal)) {
+                $('input[name=' + fieldName + ']').val(currentVal + 1);
+            } else {
+                $('input[name=' + fieldName + ']').val(0);
             }
-            return x1 + x2;
-        }
+            sumTotal();
+        });
+        $('[data-quantity="minus"]').click(function (e) {
+            e.preventDefault();
+            fieldName = $(this).attr('data-field');
+            var currentVal = parseInt($('input[name=' + fieldName + ']').val());
+            if (!isNaN(currentVal) && currentVal > 0) {
+                $('input[name=' + fieldName + ']').val(currentVal - 1);
+            } else {
+                $('input[name=' + fieldName + ']').val(0);
+            }
+            sumTotal();
+        });
 
-        function checkValidateData() {
-            if ($('#cQuantity').val() == '' || $('#cQuantity').val() == '0') {
-                sweetAlert("Thông báo", "Thông tin số lượng sản phẩm không được để trống", "error");
-                return false;
-            }
-            if (parseInt($('#cQuantity').val() || 0) > parseInt($('#mQuantityInstock').text() || 0)) {
-                sweetAlert("Thông báo", "Thông tin số lượng không được lớn hơn số lượng còn lại của sản phẩm", "error");
-                return false;
-            }
-            if ($('#cSize').val() == '') {
-                sweetAlert("", "Vui lòng chọn kích cỡ", "error");
-                return false;
-            }
-            if ($('#cColor').val() == '') {
-                sweetAlert("", "Vui lòng chọn màu sắc", "error");
-                return false;
-            }
+        $(".quantity").change(function () {
+            sumTotal();
+        });
 
-            return true;
-        }
-
-        function validatePhoneNumber(code) {
-            var regex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
-            return regex.test(code);
-        }
-        function checkOrderData() {
-            if ($('#ShippingFullName').val() == '') {
-                sweetAlert("Thông báo", "Thông tin Họ tên người mua hàng không được để trống", "error");
-                return false;
-            }
-            if ($('#ShippingPhone').val() == '') {
-                sweetAlert("", "Thông tin Số điện thoại không được để trống", "error");
-                return false;
-            }
-            if (!validatePhoneNumber($('#ShippingPhone').val())) {
-                sweetAlert("Thông báo", "Thông tin Số điện thoại không đúng định dạng", "error");
-                return false;
-            }
-            if ($('#selectProvince').val() == '') {
-                sweetAlert("", "Thông tin thành phố không được để trống", "error");
-                return false;
-            }
-            if ($('#selectDistrict').val() == '') {
-                sweetAlert("", "Thông tin huyện không được để trống", "error");
-                return false;
-            }
-            if ($('#selectWards').val() == '') {
-                sweetAlert("", "Thông tin phường xã không được để trống", "error");
-                return false;
-            }
-            if ($('#ShippingEmail').val() == '') {
-                sweetAlert("", "Thông tin Email không được để trống", "error");
-                return false;
-            }
-            if ($('#PaymentType').val() == '') {
-                sweetAlert("", "Thông tin thanh toán không được để trống", "error");
-                return false;
-            }
-            if ($('#ShippingAddress').val() == '') {
-                sweetAlert("", "Thông tin địa chỉ không được để trống", "error");
-                return false;
-            }
-            return true;
-        }
-
-
-        function changeImageProd(strImage) {
-            $('#imgProd').attr('src', '/images/' + strImage);
+        $('.list-styles > li').click(function () {
+            $('.list-styles > li').css('background-color', 'white');
+            $(this).css('background-color', '#00CCCC');
+            $('#cColor').val($(this).val());
             getQuantityInstock();
-        }
-        function changeLikeCount() {
-            $.ajax({
-                data: { cProductId: $('#cProductId').val() },
-                contentType: 'application/json',
-                dataType: 'json',
-                url: '/Product/ReleaseHeart',
-                type: 'GET',
-                success: function (response) {
-                    location.reload();
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    location.reload();
-                }
-            });
+        });
+
+        $('.list-sizes > li').click(function () {
+            $('.list-sizes > li').css('background-color', 'white');
+            $(this).css('background-color', '#00CCCC');
+            $('#cSize').val($(this).val());
+            getQuantityInstock();
+        });
+
+        var er = document.getElementById('error')
+        if (er != null) {
+            if ($('#error').text() == 'Failed')
+                swal("Không thành công", "Thao tác thất bại, vui lòng thực hiện lại", "error");
+            else
+                swal("Thành công", "Thao tác thành công", "success");
         }
 
-        function AddToCart() {
-            if (checkValidateData()) {
-                swal("Bạn muốn thêm nhanh vào giỏ hàng của mình?", {
-                    title: 'Bạn muốn thêm nhanh vào giỏ hàng của mình?',
-                    icon: 'info',
-                    buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
-                }).then(function (isConfirm) {
-                    if (isConfirm) {
-                        var _total_money = $('#cTotalMoney').val();
-                        var _color = $('#cColor').val();
-                        var _size = $('#cSize').val();
-                        var _quantity = $('#cQuantity').val();
-                        var _price = $('#cPrice').val();
-                        var _product_id = $('#cProductId').val();
-                        var _description = $('#cDescription').val();
-                        document.location = "/Product/AddToCart?cTotalMoney=" + _total_money + "&cColor=" + _color + "&cSize=" + _size + "&cQuantity=" + _quantity + "&cPrice=" + _price
-                            + "&cProductId=" + _product_id + "&cDescription=" + _description;
-                    } else {
-                        swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
+        var messerror = document.getElementById('messerror')
+        if (messerror != null) {
+            swal("Không thành công", messerror, "error");
+        }
+    });
+
+    function checkphone() {
+        let regex = /^[0-9]+$/;
+        if (!regex.test($("#ShippingPhone").val()))
+            $("#ShippingPhone").val($("#ShippingPhone").val().replace(/[^0-9.]/g, ""));
+    }
+
+    function CheckDiscountCode() {
+        $("#selectVoucher").val(0)
+
+        let _discountCode = $("#DiscountCode").val();
+        $.ajax({
+            url: "/Product/GetVoucher?discountCode=" + _discountCode,
+            type: "GET",
+            success: function (result) {
+                let totalProduct = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, ''));
+                let discount = 0;
+                var total = 0;
+                if (result != null) {
+                    if (result.discountForm == "%") {
+                        discount = Math.round(TinhPhanTram(totalProduct, result.discountRate))
+                        if (discount > result.maximumDiscount)
+                            discount = result.maximumDiscount
                     }
-                });
-            }
-        }
+                    else {
+                        discount = result.discountRate
+                    }
+                    $("#txtGiamGia").text(commasThousands(discount))
+                    total = totalProduct - discount + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/\./g, ''));
 
-        function BuyNow() {
-            if (checkValidateData()) {
-                var products = [];
-                var _product = {};
-                _product.color = parseInt($('#cColor').val());
-                _product.size = parseInt($('#cSize').val());
-                _product.price = parseFloat($('#cPrice').val());
-                _product.quantity = parseInt($('#cQuantity').val());
-                _product.totalMoneyItem = parseFloat($('#cTotalMoney').val());
-                _product.productId = $('#cProductId').val();
-                products.push(_product);
-
-                let total = $('#cTotalMoney').val();
-
-                if (@checkByNow == 1) {
-                    DataAddressCustomer();
+                    swal("Áp dụng thành công mã giảm giá: " + _discountCode, "Bạn được giảm: " + commasThousands(discount) + " đ ", "success");
+                }
+                else {
+                    swal("Thông báo!", "Mã giảm giá không được áp dụng!", "error");
+                    $("#txtGiamGia").text(0)
+                    $("#txtDiscountForm").text("đ")
+                    total = totalProduct + parseFloat(document.querySelector('#txtPhiShip').innerText.replace(/\./g, ''));
                 }
 
-                GetDataVoucher(total);
+                if (total < 0) {
+                    total = 0;
+                }
+
 
                 $('#textTotalMoney').text(commasThousands(total));
                 $('#pTotalMoney').val(total);
-
-                $.ajax({
-                    data: {
-                        products: JSON.stringify(products)
-                    },
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    url: '/Product/Order',
-                    type: 'GET'
-                });
-
-                //Lấy thông tin người dùng
-                $.ajax({
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    url: '/Product/GetCustomerInfo',
-                    type: 'GET',
-                    success: function (result) {
-                        $("#ShippingFullName").val(result.name);
-                        $("#ShippingPhone").val(result.phoneNumber);
-                        $("#ShippingEmail").val(result.email);
-                    }
-                });
-                $('#OrderModal').modal('show');
+                $('#cGiamGia').val(discount);
             }
+        })
+    }
+
+    function TinhPhanTram(tongtien, giamgia) {
+        let thanhtien = tongtien - (tongtien * ((100 - giamgia) / 100))
+        return thanhtien
+    }
+
+    function ConvertDate(time) {
+        var date = new Date(time);
+        var dateConvert = (((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '/' + ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '/' + date.getFullYear())
+        return dateConvert
+    }
+
+    function OpenDeliveryAddress() {
+        $('#OrderModal').modal('hide');
+    }
+    e.preventDefault();
+
+
+    function ShippingFee(district_id, ward_code) {
+        $.ajax({
+            url: "/Product/ShippingFee?district_id=" + district_id + "&ward_code=" + ward_code,
+            type: "GET",
+            success: function (result) {
+                var total = 0;
+                var total = parseFloat(document.querySelector('#txtTotalProduct').innerText.replace(/\./g, '')) + result - parseFloat(document.querySelector('#txtGiamGia').innerText.replace(/\./g, ''));
+                if (total < 0) {
+                    total = 0;
+                }
+                $("#txtPhiShip").text(commasThousands(result))
+                $('#textTotalMoney').text(commasThousands(total));
+                $('#pTotalMoney').val(total);
+                $('#cShippingFee').val(result);
+            }
+        })
+    }
+
+    function GetDataVoucherById(totalMoneyOrder) {
+        $.ajax({
+            url: "/Product/GetVoucher?totalMoneyOrder=" + totalMoneyOrder,
+            type: "GET",
+            success: function (result) {
+                var renderData = "<option></option>";
+                $.each(result, function (value) {
+                    var date = result[value].expirationDate;
+                    renderData += '<option value="' + result[value].id + '">' + result[value].name + '</option>';
+                    renderData += '<option disabled style = "font-style:italic" > (Đơn Tối Thiểu ' + commasThousands(result[value].minimumOrder) + 'đ)' + '</option>'
+
+                    if (result[value].discountForm == "%")
+                        renderData += '<option disabled style = "font-style:italic" > (Giảm tối đa ' + commasThousands(result[value].maximumDiscount) + 'đ)' + '</option>'
+
+                    renderData += '<option disabled style = "font-style:italic" > (HSD: ' + ConvertDate(date) + ')' + ' </option>'
+                    renderData += '<option disabled style="font-style:italic"></option>'
+                });
+                $("#selectVoucher").html(renderData)
+            }
+        })
+    }
+
+    function GetDataVoucher(totalMoneyOrder) {
+        $.ajax({
+            url: "/Product/GetVoucher?totalMoneyOrder=" + totalMoneyOrder,
+            type: "GET",
+            success: function (result) {
+                var renderData = "<option></option>";
+                $.each(result, function (value) {
+
+                    var date = result[value].expirationDate;
+                    renderData += '<option value="' + result[value].id + '">' + result[value].name + '</option>';
+                    renderData += '<option disabled style = "font-style:italic" > (Đơn Tối Thiểu ' + commasThousands(result[value].minimumOrder) + 'đ)' + '</option>'
+
+                    if (result[value].discountForm == "%")
+                        renderData += '<option disabled style = "font-style:italic" > (Giảm tối đa ' + commasThousands(result[value].maximumDiscount) + 'đ)' + '</option>'
+
+                    renderData += '<option disabled style = "font-style:italic" > (HSD: ' + ConvertDate(date) + ')' + ' </option>'
+                    renderData += '<option disabled style="font-style:italic"></option>'
+                });
+                $("#selectVoucher").html(renderData)
+            }
+        })
+    }
+
+    function getQuantityInstock() {
+        $.ajax({
+            data: {
+                cColorId: $('#cColor').val(),
+                cSizeId: $('#cSize').val(),
+                cProductId: $('#cProductId').val()
+            },
+            contentType: 'application/json',
+            dataType: 'json',
+            url: '/Product/GetQuantityInstock',
+            type: 'GET',
+            success: function (result) {
+                $('#mQuantityInstock').text(result);
+            }
+        });
+    }
+
+    function sumTotal() {
+        let mQuantity = parseInt($('#quantity').val().replace(/\./g, '') || 0) || 0;
+        console.log(mQuantity)
+        let mPrice = parseFloat(@price) || 0;
+        $('#cQuantity').val(mQuantity);
+        $('#cPrice').val(mPrice);
+        $('#cTotalMoney').val(mQuantity * mPrice);
+        $('#pTotalMoney').val(mQuantity * mPrice);
+        $('#totalMoney').text(commasThousands(mQuantity * mPrice) + ' đ');
+        $('#txtTotalProduct').text(commasThousands($('#pTotalMoney').val()));
+    }
+
+    function commasThousands(nStr) {
+        nStr += '';
+        nStr = nStr.replace(/\./g, '');
+        x = nStr.split('.');
+        x1 = x[0];
+        x2 = x.length > 1 ? '.' + x[1] : '';
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1)) {
+            x1 = x1.replace(rgx, '$1' + '.' + '$2');
+        }
+        return x1 + x2;
+    }
+
+    function checkValidateData() {
+        console.log("size : " + $('#cSize').val())
+        console.log("color : " + $('#cColor').val())
+        console.log("Quantity : " + $('#cQuantity').val())
+        if ($('#cQuantity').val() == '' || $('#cQuantity').val() == '0') {
+            sweetAlert("Thông báo", "Thông tin số lượng sản phẩm không được để trống", "error");
+            return false;
+        }
+        if (parseInt($('#cQuantity').val() || 0) > parseInt($('#mQuantityInstock').text() || 0)) {
+            sweetAlert("Thông báo", "Thông tin số lượng không được lớn hơn số lượng còn lại của sản phẩm", "error");
+            return false;
+        }
+        if ($('#cSize').val() == '') {
+            sweetAlert("", "Vui lòng chọn kích cỡ", "error");
+            return false;
+        }
+        if ($('#cColor').val() == '') {
+            sweetAlert("", "Vui lòng chọn màu sắc", "error");
+            return false;
         }
 
-        $('#btnCloseModal').click(function () {
-            $('#OrderModal').modal('hide');
-        });
+        return true;
+    }
 
-
-        function SCRate() {
-            for (var i = 1; i <= @totalRating; i++) {
-                $("#sRate" + i).attr('class', 'starGlowN');
-            }
+    function validatePhoneNumber(code) {
+        var regex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+        return regex.test(code);
+    }
+    function checkOrderData() {
+        if ($('#ShippingFullName').val() == '') {
+            sweetAlert("Thông báo", "Thông tin Họ tên người mua hàng không được để trống", "error");
+            return false;
         }
+        if ($('#ShippingPhone').val() == '') {
+            sweetAlert("", "Thông tin Số điện thoại không được để trống", "error");
+            return false;
+        }
+        if (!validatePhoneNumber($('#ShippingPhone').val())) {
+            sweetAlert("Thông báo", "Thông tin Số điện thoại không đúng định dạng", "error");
+            return false;
+        }
+        if ($('#selectProvince').val() == '') {
+            sweetAlert("", "Thông tin thành phố không được để trống", "error");
+            return false;
+        }
+        if ($('#selectDistrict').val() == '') {
+            sweetAlert("", "Thông tin huyện không được để trống", "error");
+            return false;
+        }
+        if ($('#selectWards').val() == '') {
+            sweetAlert("", "Thông tin phường xã không được để trống", "error");
+            return false;
+        }
+        if ($('#ShippingEmail').val() == '') {
+            sweetAlert("", "Thông tin Email không được để trống", "error");
+            return false;
+        }
+        if ($('#PaymentType').val() == '') {
+            sweetAlert("", "Thông tin thanh toán không được để trống", "error");
+            return false;
+        }
+        if ($('#ShippingAddress').val() == '') {
+            sweetAlert("", "Thông tin địa chỉ không được để trống", "error");
+            return false;
+        }
+        return true;
+    }
 
-        $(function () {
-            SCRate();
+
+    function changeImageProd(strImage) {
+        $('#imgProd').attr('src', '/images/' + strImage);
+        getQuantityInstock();
+    }
+    function changeLikeCount() {
+        $.ajax({
+            data: { cProductId: $('#cProductId').val() },
+            contentType: 'application/json',
+            dataType: 'json',
+            url: '/Product/ReleaseHeart',
+            type: 'GET',
+            success: function (response) {
+                location.reload();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                location.reload();
+            }
         });
-    </script>
+    }
+
+    function AddToCart() {
+        if (checkValidateData()) {
+            swal("Bạn muốn thêm nhanh vào giỏ hàng của mình?", {
+                title: 'Bạn muốn thêm nhanh vào giỏ hàng của mình?',
+                icon: 'info',
+                buttons: ["Không, tôi cần xem lại", "Có, tôi đồng ý"],
+            }).then(function (isConfirm) {
+                if (isConfirm) {
+                    console.log(isConfirm)
+                    var _total_money = $('#cTotalMoney').val();
+                    var _color = $('#cColor').val();
+                    var _size = $('#cSize').val();
+                    var _quantity = $('#cQuantity').val();
+                    var _price = $('#cPrice').val();
+                    var _product_id = $('#cProductId').val();
+                    var _description = $('#cDescription').val();
+                    document.location = "/Product/AddToCart?cTotalMoney=" + _total_money + "&cColor=" + _color + "&cSize=" + _size + "&cQuantity=" + _quantity + "&cPrice=" + _price
+                        + "&cProductId=" + _product_id + "&cDescription=" + _description;
+                } else {
+                    swal("Đã hủy", "Bạn đã không lưu những thay đổi này!", "error");
+                }
+            });
+        }
+    }
+
+    function BuyNow() {
+        if (checkValidateData()) {
+            var products = [];
+            var _product = {};
+            _product.color = parseInt($('#cColor').val());
+            _product.size = parseInt($('#cSize').val());
+            _product.price = parseFloat($('#cPrice').val());
+            _product.quantity = parseInt($('#cQuantity').val());
+            _product.totalMoneyItem = parseFloat($('#cTotalMoney').val());
+            _product.productId = $('#cProductId').val();
+            products.push(_product);
+
+            let total = $('#cTotalMoney').val();
+
+            if (@checkByNow == 1) {
+                DataAddressCustomer();
+            }
+
+            GetDataVoucher(total);
+
+            $('#textTotalMoney').text(commasThousands(total));
+            $('#pTotalMoney').val(total);
+
+            $.ajax({
+                data: {
+                    products: JSON.stringify(products)
+                },
+                contentType: 'application/json',
+                dataType: 'json',
+                url: '/Product/Order',
+                type: 'GET'
+            });
+
+            //Lấy thông tin người dùng
+            $.ajax({
+                contentType: 'application/json',
+                dataType: 'json',
+                url: '/Product/GetCustomerInfo',
+                type: 'GET',
+                success: function (result) {
+                    $("#ShippingFullName").val(result.name);
+                    $("#ShippingPhone").val(result.phoneNumber);
+                    $("#ShippingEmail").val(result.email);
+                }
+            });
+            $('#OrderModal').modal('show');
+        }
+    }
+
+    $('#btnCloseModal').click(function () {
+        $('#OrderModal').modal('hide');
+    });
+
+
+    function SCRate() {
+        for (var i = 1; i <= @totalRating; i++) {
+            $("#sRate" + i).attr('class', 'starGlowN');
+        }
+    }
+
+    $(function () {
+        SCRate();
+    });
+</script>

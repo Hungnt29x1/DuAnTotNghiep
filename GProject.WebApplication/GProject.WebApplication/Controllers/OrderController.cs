@@ -207,6 +207,11 @@ namespace GProject.WebApplication.Controllers
             {
                 var employee = HttpContext.Session.GetObjectFromJson<Employee>("userLogin");
                 var order = orderRepository.GetAll().Where(c => c.Id == new Guid(id)).FirstOrDefault();
+                if(status == 3)
+                {
+                    order.PaymentDate = DateTime.Now;
+                    orderRepository.Update(order);
+                }
 
                 if (order != null)
                 {
